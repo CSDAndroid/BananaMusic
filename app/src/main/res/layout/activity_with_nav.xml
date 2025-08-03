@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/white">
+
+    <!-- 内容容器 - 占满整个屏幕，不被导航栏遮挡 -->
+    <FrameLayout
+        android:id="@+id/content_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <!-- 底部导航栏 - 悬浮在内容上方 -->
+    <include
+        layout="@layout/nav_all"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:layout_marginBottom="0dp"
+        android:elevation="16dp" />
+
+</FrameLayout> 

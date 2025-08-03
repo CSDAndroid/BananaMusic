@@ -1,0 +1,104 @@
+package com.example.musicapp
+
+import android.content.Intent
+import android.media.MediaPlayer
+import android.util.Log
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+
+
+private var mediaPlayer: MediaPlayer? = null
+private var playbackState = PlaybackState.IDLE
+private var retryCount = 0
+private var Is_play = ""
+enum class PlaybackState { IDLE, PREPARING, PLAYING, PAUSED, ERROR }
+
+fun playAudio(url: String,music: Music) {
+    if (playbackState == PlaybackState.PLAYING) {
+        stopPlayback()
+    }
+
+    Log.d("data2", "准备播放: $url")
+    playbackState = PlaybackState.PREPARING
+    Is_play = url
+
+    CoroutineScope(Dispatchers.IO).launch {
+        try {
+            mediaPlayer?.let {
+                it.reset()
+            } ?: run {
+                mediaPlayer = MediaPlayer().apply {
+                    setOnCompletionListener {
+                        Log.d("data2", "播放完成")
+                        playbackState = PlaybackState.IDLE
+                    }
+                    setOnErrorListener { _, what, extra ->
+                        Log.e("data2", "播放错误: what=$what, extra=$extra")
+                        playbackState = PlaybackState.ERROR
+                        if (retryCount < 3) {
+                            retryCount++
+                            playAudio(url,music) // 自动重试
+                        } else {
+                            releasePlayer()
+
+                        }
+                        false
+                    }
+                    setOnPreparedListener { mp ->
+                        mp.start()
+                        playbackState = PlaybackState.PLAYING
+                        Log.d("data2", "开始播放")
+                    }
+                }
+            }
+
+            withContext(Dispatchers.IO) {
+                mediaPlayer?.apply {
+                    setDataSource(url)
+                    prepareAsync() // 异步准备
+                }
+            }
+        } catch (e: Exception) {
+            Log.e("data2", "播放失败: ${e.message}", e)
+            playbackState = PlaybackState.ERROR
+            releasePlayer()
+        }
+    }
+}
+
+fun stopPlayback() {
+    mediaPlayer?.let {
+        if (it.isPlaying) {
+            it.stop()
+        }
+        it.reset()
+        playbackState = PlaybackState.IDLE
+        Log.d("data2", "停止播放")
+    }
+}
+fun stop_Or_start(url: String,music: Music){
+    Log.d("data2", "停止播放$Is_play")
+    if (Is_play == url){
+        if (playbackState == PlaybackState.PLAYING){
+            mediaPlayer?.pause()
+            playbackState = PlaybackState.PAUSED
+            Log.d("data2", "暂停播放$Is_play")
+        } else{
+            mediaPlayer?.start()
+            playbackState = PlaybackState.PLAYING
+            Log.d("data2", "继续播放$Is_play")
+        }
+    }else{
+        playAudio(url, music)
+    }
+
+}
+
+fun releasePlayer() {
+    mediaPlayer?.release()
+    mediaPlayer = null
+    playbackState = PlaybackState.IDLE
+    Log.d("data2", "释放播放器")
+}

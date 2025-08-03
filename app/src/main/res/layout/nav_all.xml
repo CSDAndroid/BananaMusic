@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_all_container"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="bottom"
+    android:paddingBottom="8dp"
+    android:background="@android:color/transparent"
+    android:elevation="8dp">
+
+    <include
+        layout="@layout/music_bar"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="100dp"
+        android:layout_gravity="bottom"/>
+
+    <include
+        layout="@layout/nav"
+        android:layout_width="wrap_content"
+        android:layout_height="70dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginBottom="15dp"
+        android:layout_gravity="bottom|start"/>
+
+    <!-- 右侧搜索按钮：底部右对齐 -->
+    <include
+        layout="@layout/search_button"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="15dp"
+        android:layout_gravity="bottom|end"/>
+
+</FrameLayout>

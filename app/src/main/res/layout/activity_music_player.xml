@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main_player"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/frosted_glass"
+    tools:context=".MusicPlayerActivity">
+
+    <!-- 新增：上方中间位置的down图标 -->
+    <ImageView
+        android:id="@+id/iv_down"
+        android:layout_width="30dp"
+    android:layout_height="30dp"
+    android:src="@drawable/down"
+    android:scaleType="centerInside"
+    android:layout_marginBottom="40dp"
+    app:layout_constraintBottom_toTopOf="@id/album_cover"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent" />
+
+    <!-- 专辑封面（原有） -->
+    <ImageView
+        android:id="@+id/album_cover"
+        android:layout_width="250dp"
+        android:layout_height="250dp"
+        android:layout_marginBottom="24dp"
+        android:layout_marginTop="48dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/music"
+        app:layout_constraintBottom_toTopOf="@id/tv_song_name"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <!-- 歌曲信息区（原有） -->
+    <TextView
+        android:id="@+id/tv_song_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:text="晴天"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@id/tv_artist"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/tv_artist"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:gravity="center"
+        android:text="周杰伦"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toTopOf="@id/tv_lyric_current"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <!-- 歌词区（原有） -->
+    <TextView
+        android:id="@+id/tv_lyric_current"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:text="从前从前 有个人爱你很久"
+        android:textColor="#333333"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toTopOf="@id/tv_lyric_next"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/tv_lyric_next"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:text="但偏偏 风渐渐 把距离吹得好远"
+        android:textColor="#999999"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toTopOf="@id/layout_functions"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <!-- 功能按钮区（原有） -->
+    <LinearLayout
+        android:id="@+id/layout_functions"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="32dp"
+        android:gravity="center"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toTopOf="@id/seek_bar">
+
+        <ImageView
+            android:id="@+id/iv_effect"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_marginHorizontal="16dp"
+            android:src="@drawable/ic_effect" />
+
+        <ImageView
+            android:id="@+id/iv_download"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_marginHorizontal="16dp"
+            android:src="@drawable/ic_download" />
+
+        <ImageView
+            android:id="@+id/iv_more"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_marginHorizontal="16dp"
+            android:src="@drawable/ic_more" />
+    </LinearLayout>
+
+    <!-- 进度条与时间文本（原有） -->
+    <TextView
+        android:id="@+id/tv_current_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:text="01:11"
+        android:textSize="14sp"
+        app:layout_constraintBottom_toBottomOf="@id/seek_bar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/seek_bar" />
+
+    <SeekBar
+        android:id="@+id/seek_bar"
+        android:layout_width="0dp"
+        android:layout_height="32dp"
+        android:layout_marginBottom="32dp"
+        android:layout_marginHorizontal="8dp"
+        android:max="269"
+        android:progress="71"
+        app:layout_constraintBottom_toTopOf="@id/layout_play_controls"
+        app:layout_constraintEnd_toStartOf="@id/tv_total_time"
+        app:layout_constraintStart_toEndOf="@id/tv_current_time" />
+
+    <TextView
+        android:id="@+id/tv_total_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="24dp"
+        android:text="04:29"
+        android:textSize="14sp"
+        app:layout_constraintBottom_toBottomOf="@id/seek_bar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/seek_bar" />
+
+    <!-- 播放控制区（原有） -->
+    <LinearLayout
+        android:id="@+id/layout_play_controls"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="48dp"
+        android:gravity="center"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <ImageView
+            android:id="@+id/iv_repeat"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_marginHorizontal="16dp"
+            android:src="@drawable/ic_repeat" />
+
+        <ImageView
+            android:id="@+id/iv_previous"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginHorizontal="16dp"
+            android:src="@drawable/ic_previous" />
+
+        <ImageView
+            android:id="@+id/iv_play_pause"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_marginHorizontal="16dp"
+            android:src="@drawable/ic_play" />
+
+        <ImageView
+            android:id="@+id/iv_next"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginHorizontal="16dp"
+            android:src="@drawable/ic_next" />
+
+        <ImageView
+            android:id="@+id/iv_audio_effect"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_marginHorizontal="16dp"
+            android:src="@drawable/ic_audio_effect" />
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
