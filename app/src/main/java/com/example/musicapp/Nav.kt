@@ -64,6 +64,7 @@ abstract class Nav : AppCompatActivity() {
         
         // 调用子类的初始化方法
         initActivity()
+
     }
     
     /**

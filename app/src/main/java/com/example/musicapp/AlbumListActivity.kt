@@ -15,8 +15,11 @@ import androidx.cardview.widget.CardView
 import androidx.core.content.edit
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.bumptech.glide.Glide
 import com.example.musicapp.network.ApiResponse
+import com.example.musicapp.network.Get_Network_Music
+import com.example.musicapp.network.MusicCallback
 import com.example.musicapp.network.RetrofitInstance
 import retrofit2.Call
 import retrofit2.Callback
@@ -29,7 +32,8 @@ class AlbumListActivity : AppCompatActivity() {
     private lateinit var  tv_artist : TextView
     private lateinit var  tv_song_name : TextView
 
-    private val musiclist1 = ArrayList<Music>()
+    private var musiclist1 = ArrayList<Music>()
+    private lateinit var rv_songs : RecyclerView
 
     private lateinit var adapter: TitleAdapter
     var t = 0
@@ -39,39 +43,17 @@ class AlbumListActivity : AppCompatActivity() {
         enableEdgeToEdge()
         setContentView(R.layout.activity_album_list)
         actionBar?.hide()
-
-
+        val swipeRefreshLayout = findViewById<SwipeRefreshLayout>(R.id.swipeRefreshLayout)
 
         t = getIntent().getIntExtra("t", 0) + 1
         Log.d("SongData", "onCreate: $t")
 
 
-        val rv_songs = findViewById<RecyclerView>(R.id.rv_songs)
+        rv_songs = findViewById<RecyclerView>(R.id.rv_songs)
         iv_album_cover = findViewById<ImageView>(R.id.iv_album_cover)
         tv_album_title = findViewById<TextView>(R.id.tv_album_title)
         tv_artist = findViewById<TextView>(R.id.tv_artist)
         tv_song_name = findViewById<TextView>(R.id.tv_song_name)
-
-
-        adapter = TitleAdapter(musiclist1,{ music ->
-            // 点击事件回调
-            loadAlbumCover(music.pic)
-            tv_album_title.text = music.song
-            tv_artist.text = music.sing
-            getSharedPreferences("data",MODE_PRIVATE).edit{
-                putString("song","${music.song}")
-                putString("sing","${music.sing}")
-                putString("pic_url","${music.pic}")
-                putLong("music_id", music.id)
-                putString("music_url","${music.url}")
-            }
-            val prefs = getSharedPreferences("data", Context.MODE_PRIVATE)
-            val song = prefs.getString("song","").toString()
-            val url = prefs.getString("music_url","")
-            Log.e("data5", "onCreate: $url $song", )
-        })
-
-
 
 
         val prefs = getSharedPreferences("data", Context.MODE_PRIVATE)
@@ -84,47 +66,46 @@ class AlbumListActivity : AppCompatActivity() {
         tv_album_title.text = song
         tv_artist.text = sing
         loadAlbumCover(pic)
-        rv_songs.adapter = adapter
-        rv_songs.layoutManager = LinearLayoutManager(this)
-        if (t > 0 && t <= 4) {
-            RetrofitInstance.api.getMusic(t).enqueue(object : Callback<ApiResponse> {
-                override fun onResponse(
-                    call: Call<ApiResponse?>,
-                    response: Response<ApiResponse?>
-                ) {
-                    if (response.isSuccessful) {
-                        val apiResponse = response.body()
-                        apiResponse?.data?.forEach { song ->
-                            Log.d(
-                                "SongData",
-                                "Song: ${song.song}, Singer: ${song.sing}, ID: ${song.id}  url: ${song.url} pic : ${song.pic}"
-                            )
-                            val pic = song.pic.replace("http", "https")
-                            val music = Music(
-                                song.song,
-                                song.sing,
-                                pic,
-                                R.drawable.music,
-                                song.id,
-                                song.url
-                            )
-                            musiclist1.add(music)
-                            get_his_music(music)
-                        }
-                    } else {
-                        Log.e("MainActivity", "Error: ${response.errorBody()?.string()}")
-                    }
-                    adapter.notifyDataSetChanged()
+        loadmusic(t)
+        swipeRefreshLayout.setOnRefreshListener {
+            loadmusic(t)
+            swipeRefreshLayout.isRefreshing = false
 
-                }
-
-                override fun onFailure(call: Call<ApiResponse>, t: Throwable) {
-                    Log.e("SongData", "Error: ${t.message}")
-                }
-            })
         }
 
 
+
+    }
+    private fun loadmusic(t: Int){
+        Get_Network_Music(t, object : MusicCallback {
+            override fun onSuccess(musicList: ArrayList<Music>) {
+                musiclist1 = musicList
+                adapter = TitleAdapter(musiclist1, { music ->
+                    // 点击事件回调
+                    loadAlbumCover(music.pic)
+                    tv_album_title.text = music.song
+                    tv_artist.text = music.sing
+                    getSharedPreferences("data", MODE_PRIVATE).edit {
+                        putString("song", "${music.song}")
+                        putString("sing", "${music.sing}")
+                        putString("pic_url", "${music.pic}")
+                        putLong("music_id", music.id)
+                        putString("music_url", "${music.url}")
+                    }
+                    val prefs = getSharedPreferences("data", Context.MODE_PRIVATE)
+                    val song = prefs.getString("song", "").toString()
+                    val url = prefs.getString("music_url", "")
+                    Log.e("data5", "onCreate: $url $song",)
+                })
+                rv_songs.adapter = adapter
+                rv_songs.layoutManager = LinearLayoutManager(this@AlbumListActivity)
+            }
+
+            override fun onFailure(error: String) {
+                Log.d("error", "onFailure: $error")
+            }
+
+        })
     }
 
 

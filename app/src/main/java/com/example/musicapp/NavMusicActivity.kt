@@ -11,8 +11,11 @@ import android.widget.TextView
 import androidx.core.content.edit
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.bumptech.glide.Glide
 import com.example.musicapp.network.ApiResponse
+import com.example.musicapp.network.Get_Network_Music
+import com.example.musicapp.network.MusicCallback
 import com.example.musicapp.network.RetrofitInstance
 import retrofit2.Call
 import retrofit2.Callback
@@ -25,6 +28,7 @@ class NavMusicActivity : Nav() {
     private lateinit var iv_album_cover: ImageView
     private lateinit var tv_song_name: TextView
     private lateinit var iv_play : ImageView
+    private lateinit var rv_song : RecyclerView
 
 
 
@@ -38,22 +42,12 @@ class NavMusicActivity : Nav() {
         iv_album_cover = findViewById<ImageView>(R.id.iv_album_cover)
         tv_song_name = findViewById<TextView>(R.id.tv_song_name)
         iv_play = findViewById<ImageView>(R.id.iv_play)
-        val tv_song_name = findViewById<TextView>(R.id.tv_song_name)
-        val rv_song = findViewById<RecyclerView>(R.id.rv_song_rv)
-        val adapter = ContentAdapter(musiclist1,{music ->
-            loadAlbumCover(music.pic)
-            tv_song_name.text = music.song
-            getSharedPreferences("data",MODE_PRIVATE).edit{
-                putString("song","${music.song}")
-                putString("sing","${music.sing}")
-                putString("pic_url","${music.pic}")
-                putLong("music_id", music.id)
-                putString("music_url", "${music.url}")
-            }
-            val intent = Intent(this, MusicPlayerActivity::class.java)
-            startActivity(intent)
+        val swipeRefreshLayout = findViewById<SwipeRefreshLayout>(R.id.swipeRefreshLayout)
 
-        })
+        val tv_song_name = findViewById<TextView>(R.id.tv_song_name)
+        rv_song = findViewById<RecyclerView>(R.id.rv_song_rv)
+
+
 
         val prefs = getSharedPreferences("data", Context.MODE_PRIVATE)
         prefs.registerOnSharedPreferenceChangeListener(sharedPreferenceChangeListener)
@@ -76,48 +70,45 @@ class NavMusicActivity : Nav() {
                 yesOrNo = true
             }
         }
-        rv_song.adapter = adapter
-        val layoutmanager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
-        rv_song.layoutManager = layoutmanager
-
         val t = (1..4).random()
+        loadmusic(t)
 
-            if (t > 0 && t <= 4) {
-                RetrofitInstance.api.getMusic(t).enqueue(object : Callback<ApiResponse> {
-                    override fun onResponse(
-                        call: Call<ApiResponse?>,
-                        response: Response<ApiResponse?>
-                    ) {
-                        if (response.isSuccessful) {
-                            val apiResponse = response.body()
-                            apiResponse?.data?.forEach { song ->
-                                Log.d(
-                                    "SongData",
-                                    "Song: ${song.song}, Singer: ${song.sing}, ID: ${song.id}  url: ${song.url} pic : ${song.pic}"
-                                )
-                                val pic = song.pic.replace("http", "https")
-                                val music = Music(
-                                    song.song,
-                                    song.sing,
-                                    pic,
-                                    R.drawable.music,
-                                    song.id,
-                                    song.url
-                                )
-                                musiclist1.add(music)
-                                get_his_music(music)
-                            }
-                        } else {
-                            Log.e("MainActivity", "Error: ${response.errorBody()?.string()}")
-                        }
-                        adapter.notifyDataSetChanged()
-                    }
+        swipeRefreshLayout.setOnRefreshListener{
+            musiclist1.clear()
+            val t = (1..4).random()
+            loadmusic(t)
+            swipeRefreshLayout.isRefreshing = false
+        }
+    }
 
-                    override fun onFailure(call: Call<ApiResponse>, t: Throwable) {
-                        Log.e("SongData", "Error: ${t.message}")
+    private fun loadmusic(t : Int){
+        Get_Network_Music(t,object : MusicCallback {
+            override fun onSuccess(musicList: ArrayList<Music>) {
+                musiclist1 = musicList
+                val adapter = ContentAdapter(musiclist1,{music ->
+                    loadAlbumCover(music.pic)
+                    tv_song_name.text = music.song
+                    getSharedPreferences("data",MODE_PRIVATE).edit{
+                        putString("song","${music.song}")
+                        putString("sing","${music.sing}")
+                        putString("pic_url","${music.pic}")
+                        putLong("music_id", music.id)
+                        putString("music_url", "${music.url}")
                     }
+                    val intent = Intent(this@NavMusicActivity, MusicPlayerActivity::class.java)
+                    startActivity(intent)
                 })
+                rv_song.adapter = adapter
+                val layoutmanager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
+                rv_song.layoutManager = layoutmanager
+                adapter.notifyDataSetChanged()
             }
+
+            override fun onFailure(error: String) {
+                TODO("Not yet implemented")
+            }
+
+        })
     }
     private val sharedPreferenceChangeListener =
         SharedPreferences.OnSharedPreferenceChangeListener { sharedPreferences, key ->
@@ -142,9 +133,6 @@ class NavMusicActivity : Nav() {
                 )
             }
         }
-
-
-
 
     private fun loadAlbumCover(picUrl: String) {
         Glide.with(this)

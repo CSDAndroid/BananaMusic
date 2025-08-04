@@ -14,6 +14,8 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.example.musicapp.network.Get_Network_Music
+import com.example.musicapp.network.MusicCallback
 
 private var musiclist1 = ArrayList<Music>()
 private lateinit var historyAdapter: HistoryAdapter
@@ -41,6 +43,7 @@ class MainActivity : Nav() {
         iv_album_cover = findViewById(R.id.iv_album_cover)
         tv_song_name = findViewById(R.id.tv_song_name)
         iv_play = findViewById<ImageView>(R.id.iv_play)
+
 
         // 从SharedPreferences中读取数据
         val prefs = getSharedPreferences("data", Context.MODE_PRIVATE)
@@ -95,6 +98,10 @@ class MainActivity : Nav() {
 
         // 观察数据变化
         observeData()
+
+
+
+
     }
 
     // 初始化视图组件
@@ -114,47 +121,62 @@ class MainActivity : Nav() {
         actionbarAdapter = ActionbarAdapter1()
         findViewById<RecyclerView>(R.id.action_bar_recyclerview).adapter = actionbarAdapter
 
-        // 历史记录适配器
-        historyAdapter = HistoryAdapter(musiclist1,{ music ->
-            // 点击事件的处理逻辑
-            val intent = Intent(this@MainActivity, MusicPlayerActivity::class.java)
-            intent.putExtra("music_name", music.song)
-            intent.putExtra("music_singer", music.sing)
-            intent.putExtra("music_pic", music.pic)
-            intent.putExtra("music_id", music.id)
-            intent.putExtra("music_url", music.url)
-            startActivity(intent)
+        // 获取网络音乐数据
+        Get_Network_Music(1, object : MusicCallback {
+            override fun onSuccess(musicList: ArrayList<Music>) {
+                // 更新音乐列表
+                musiclist1 = musicList
 
-            // 更新SharedPreferences
-            getSharedPreferences("data",MODE_PRIVATE).edit{
-                putString("song","${music.song}")
-                putString("sing","${music.sing}")
-                putString("pic_url","${music.pic}")
-                putLong("music_id", music.id)
-                putString("music_url", "${music.url}")
+                // 初始化历史记录适配器
+                historyAdapter = HistoryAdapter(musiclist1) { music ->
+                    // 点击事件的处理逻辑
+                    val intent = Intent(this@MainActivity, MusicPlayerActivity::class.java)
+                    intent.putExtra("music_name", music.song)
+                    intent.putExtra("music_singer", music.sing)
+                    intent.putExtra("music_pic", music.pic)
+                    intent.putExtra("music_id", music.id)
+                    intent.putExtra("music_url", music.url)
+                    startActivity(intent)
+
+                    // 更新SharedPreferences
+                    getSharedPreferences("data", MODE_PRIVATE).edit {
+                        putString("song", "${music.song}")
+                        putString("sing", "${music.sing}")
+                        putString("pic_url", "${music.pic}")
+                        putLong("music_id", music.id)
+                        putString("music_url", "${music.url}")
+                    }
+
+                    // 更新MusicBarManager状态
+                    MusicBarManager.updateMusicInfo(
+                        songName = music.song,
+                        singerName = music.sing,
+                        albumCover = music.pic,
+                        musicId = music.id,
+                        musicUrl = music.url
+                    )
+                }
+
+                // 设置适配器
+                findViewById<RecyclerView>(R.id.history_list).adapter = historyAdapter
+                historyAdapter.notifyDataSetChanged()
+
+                // 日志输出
+                Log.d("data3", "initAdapters: $musiclist1")
             }
 
-            // 更新MusicBarManager状态
-            MusicBarManager.updateMusicInfo(
-                songName = music.song,
-                singerName = music.sing,
-                albumCover = music.pic,
-                musicId = music.id,
-                musicUrl = music.url
-            )
+            override fun onFailure(error: String) {
+                Log.e("error1", "onFailure: $error")
+            }
         })
-        historyAdapter.notifyDataSetChanged()
-        findViewById<RecyclerView>(R.id.history_list).adapter = historyAdapter
-        Log.d("data3", "initAdapters: $musiclist1")
 
         // 导航栏点击事件
         actionbarAdapter.setOnItemClickListener(object : ActionbarAdapter1.OnItemClickListener {
             override fun onItemClick(position: Int) {
                 actionbarAdapter.setSelectedPosition(position)
-
                 Log.d("SongData", "onCreate: $position")
                 val intent = Intent(this@MainActivity, AlbumListActivity::class.java)
-                intent.putExtra("t",position)
+                intent.putExtra("t", position)
                 startActivity(intent)
             }
         })
@@ -222,8 +244,3 @@ class MainActivity : Nav() {
     }
 }
 
-fun get_his_music(music : Music){
-    musiclist1.add(music)
-    Log.d("data3", "get_his_music: $music")
-    historyAdapter.notifyDataSetChanged()
-}

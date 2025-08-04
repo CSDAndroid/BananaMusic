@@ -42,6 +42,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-savedstate:2.6.2")
     implementation("androidx.activity:activity-ktx:1.8.0")
     implementation (libs.glide)
+    implementation(libs.androidx.swiperefreshlayout)
     annotationProcessor (libs.compiler)
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
