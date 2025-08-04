@@ -20,8 +20,10 @@ private lateinit var historyAdapter: HistoryAdapter
 
 class MainActivity : Nav() {
     private lateinit var iv_album_cover: ImageView
+
     private lateinit var tv_song_name: TextView
     private lateinit var mainViewModel: MainViewModel
+    private lateinit var iv_play : ImageView
     private lateinit var actionbarViewModel: ActionbarViewModel
     // 适配器实例
     private lateinit var actionbarAdapter: ActionbarAdapter1
@@ -32,19 +34,44 @@ class MainActivity : Nav() {
 
     override fun initActivity() {
         supportActionBar?.hide()
-        
+
         // 初始化Actionbar相关组件
         mainViewModel = ViewModelProvider(this)[MainViewModel::class.java]
         actionbarViewModel = ViewModelProvider(this)[ActionbarViewModel::class.java]
         iv_album_cover = findViewById(R.id.iv_album_cover)
         tv_song_name = findViewById(R.id.tv_song_name)
+        iv_play = findViewById<ImageView>(R.id.iv_play)
 
         // 从SharedPreferences中读取数据
         val prefs = getSharedPreferences("data", Context.MODE_PRIVATE)
         prefs.registerOnSharedPreferenceChangeListener(sharedPreferenceChangeListener)
         val song = prefs.getString("song", "") ?: ""
+        val sing = prefs.getString("sing", "1") ?: ""
         val pic = prefs.getString("pic_url", "") ?: ""
+        val url = prefs.getString("music_url", "") ?: ""
 
+
+        var yesOrNo = getYesOrNo()
+        if (yesOrNo){
+            iv_play.setImageResource(R.drawable.stop)
+        }else{
+            iv_play.setImageResource(R.drawable.ic_play)
+        }
+
+        iv_play.setOnClickListener {
+            val url_new = prefs.getString("music_url", "") ?: ""
+            if (yesOrNo){
+                Log.d("data4", "$yesOrNo")
+                stop_Or_start(url_new)
+                iv_play.setImageResource(R.drawable.ic_play)
+                yesOrNo = false
+            }else{
+                Log.d("data4", "$yesOrNo")
+                stop_Or_start(url_new)
+                iv_play.setImageResource(R.drawable.stop)
+                yesOrNo = true
+            }
+        }
         // 更新MusicBarManager中的状态
         MusicBarManager.updateMusicInfo(
             songName = song,
@@ -55,17 +82,17 @@ class MainActivity : Nav() {
         )
 
         // 设置歌曲名称
-        tv_song_name.text = song
+        tv_song_name.text = "$song - $sing"
 
         // 加载专辑封面
         loadAlbumCover(pic)
-        
+
         // 初始化视图
         initViews()
 
         // 初始化适配器
         initAdapters()
-        
+
         // 观察数据变化
         observeData()
     }
@@ -97,16 +124,16 @@ class MainActivity : Nav() {
             intent.putExtra("music_id", music.id)
             intent.putExtra("music_url", music.url)
             startActivity(intent)
-            
+
             // 更新SharedPreferences
             getSharedPreferences("data",MODE_PRIVATE).edit{
                 putString("song","${music.song}")
                 putString("sing","${music.sing}")
                 putString("pic_url","${music.pic}")
                 putLong("music_id", music.id)
-                putString("music_url", music.url)
+                putString("music_url", "${music.url}")
             }
-            
+
             // 更新MusicBarManager状态
             MusicBarManager.updateMusicInfo(
                 songName = music.song,
@@ -119,7 +146,7 @@ class MainActivity : Nav() {
         historyAdapter.notifyDataSetChanged()
         findViewById<RecyclerView>(R.id.history_list).adapter = historyAdapter
         Log.d("data3", "initAdapters: $musiclist1")
-        
+
         // 导航栏点击事件
         actionbarAdapter.setOnItemClickListener(object : ActionbarAdapter1.OnItemClickListener {
             override fun onItemClick(position: Int) {
@@ -164,7 +191,7 @@ class MainActivity : Nav() {
             .error(R.drawable.fm1) // 加载失败的错误图
             .into(iv_album_cover)
     }
-    
+
     private val sharedPreferenceChangeListener =
         SharedPreferences.OnSharedPreferenceChangeListener { sharedPreferences, key ->
             if (key == "song" || key == "pic_url" || key == "sing" || key == "music_id" || key == "music_url") {
@@ -173,11 +200,11 @@ class MainActivity : Nav() {
                 val sing = sharedPreferences.getString("sing", "") ?: ""
                 val musicId = sharedPreferences.getLong("music_id", 0L)
                 val musicUrl = sharedPreferences.getString("music_url", "") ?: ""
+                Log.e("data5", ": $musicUrl $song", )
 
                 // 更新UI
-                tv_song_name.text = song
+                tv_song_name.text = "$song - $sing"
                 loadAlbumCover(pic)
-                
                 // 更新MusicBarManager状态
                 MusicBarManager.updateMusicInfo(
                     songName = song,

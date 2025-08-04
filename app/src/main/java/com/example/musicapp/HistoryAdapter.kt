@@ -21,7 +21,7 @@ class HistoryAdapter(private val musiclist : List<Music>,private val onItemClick
             itemView.setOnClickListener {
                 val music = musiclist[adapterPosition]
                 onItemClickListener(music) // 回调点击事件
-                playAudio(music.url,music)
+                playAudio(music.url)
             }
         }
 

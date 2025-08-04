@@ -13,9 +13,13 @@ private var mediaPlayer: MediaPlayer? = null
 private var playbackState = PlaybackState.IDLE
 private var retryCount = 0
 private var Is_play = ""
+private var YesOrNo = false
+
+
+
 enum class PlaybackState { IDLE, PREPARING, PLAYING, PAUSED, ERROR }
 
-fun playAudio(url: String,music: Music) {
+fun playAudio(url: String) {
     if (playbackState == PlaybackState.PLAYING) {
         stopPlayback()
     }
@@ -23,7 +27,7 @@ fun playAudio(url: String,music: Music) {
     Log.d("data2", "准备播放: $url")
     playbackState = PlaybackState.PREPARING
     Is_play = url
-
+    YesOrNo = true
     CoroutineScope(Dispatchers.IO).launch {
         try {
             mediaPlayer?.let {
@@ -39,7 +43,7 @@ fun playAudio(url: String,music: Music) {
                         playbackState = PlaybackState.ERROR
                         if (retryCount < 3) {
                             retryCount++
-                            playAudio(url,music) // 自动重试
+                            playAudio(url) // 自动重试
                         } else {
                             releasePlayer()
 
@@ -78,20 +82,21 @@ fun stopPlayback() {
         Log.d("data2", "停止播放")
     }
 }
-fun stop_Or_start(url: String,music: Music){
+fun stop_Or_start(url: String){
     Log.d("data2", "停止播放$Is_play")
     if (Is_play == url){
         if (playbackState == PlaybackState.PLAYING){
             mediaPlayer?.pause()
             playbackState = PlaybackState.PAUSED
             Log.d("data2", "暂停播放$Is_play")
+            YesOrNo = false
         } else{
             mediaPlayer?.start()
             playbackState = PlaybackState.PLAYING
             Log.d("data2", "继续播放$Is_play")
         }
     }else{
-        playAudio(url, music)
+        playAudio(url)
     }
 
 }
@@ -101,4 +106,7 @@ fun releasePlayer() {
     mediaPlayer = null
     playbackState = PlaybackState.IDLE
     Log.d("data2", "释放播放器")
+}
+fun getYesOrNo() : Boolean{
+    return YesOrNo
 }
