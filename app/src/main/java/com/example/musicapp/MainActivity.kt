@@ -11,6 +11,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.content.edit
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -18,6 +19,7 @@ import com.example.musicapp.network.Get_Network_Music
 import com.example.musicapp.network.MusicCallback
 
 private var musiclist1 = ArrayList<Music>()
+private var musiclist2 = ArrayList<Music>()
 private lateinit var historyAdapter: HistoryAdapter
 
 class MainActivity : Nav() {
@@ -179,6 +181,51 @@ class MainActivity : Nav() {
                 intent.putExtra("t", position)
                 startActivity(intent)
             }
+        })
+        val t = (1..4).random()
+        Get_Network_Music(t,object :MusicCallback{
+            @SuppressLint("WrongViewCast")
+            override fun onSuccess(musicList: ArrayList<Music>) {
+                musiclist2 = musicList
+                val adapter = TitleAdapterDay(musiclist2,{ music ->
+                    val intent = Intent(this@MainActivity, MusicPlayerActivity::class.java)
+                    intent.putExtra("music_name", music.song)
+                    intent.putExtra("music_singer", music.sing)
+                    intent.putExtra("music_pic", music.pic)
+                    intent.putExtra("music_id", music.id)
+                    intent.putExtra("music_url", music.url)
+                    startActivity(intent)
+
+                    // 更新SharedPreferences
+                    getSharedPreferences("data", MODE_PRIVATE).edit {
+                        putString("song", "${music.song}")
+                        putString("sing", "${music.sing}")
+                        putString("pic_url", "${music.pic}")
+                        putLong("music_id", music.id)
+                        putString("music_url", "${music.url}")
+                    }
+
+                    // 更新MusicBarManager状态
+                    MusicBarManager.updateMusicInfo(
+                        songName = music.song,
+                        singerName = music.sing,
+                        albumCover = music.pic,
+                        musicId = music.id,
+                        musicUrl = music.url
+                    )
+
+                })
+                val rv_day = findViewById<RecyclerView>(R.id.rv_day)
+                rv_day.adapter = adapter
+                val layoutManager = GridLayoutManager(this@MainActivity, 3, GridLayoutManager.HORIZONTAL, false)
+                rv_day.layoutManager = layoutManager
+                adapter.notifyDataSetChanged()
+            }
+
+            override fun onFailure(error: String) {
+                TODO("Not yet implemented")
+            }
+
         })
     }
 
