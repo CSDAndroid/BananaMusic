@@ -5,6 +5,8 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.View
 import android.widget.ImageView
@@ -22,6 +24,7 @@ private var musiclist1 = ArrayList<Music>()
 private var musiclist2 = ArrayList<Music>()
 private lateinit var historyAdapter: HistoryAdapter
 
+
 class MainActivity : Nav() {
     private lateinit var iv_album_cover: ImageView
 
@@ -31,6 +34,30 @@ class MainActivity : Nav() {
     private lateinit var actionbarViewModel: ActionbarViewModel
     // 适配器实例
     private lateinit var actionbarAdapter: ActionbarAdapter1
+    //处理播放播放控制栏的图标切换
+//----------------------------------------------------------
+    private val mainHandler = Handler(Looper.getMainLooper())
+    private val playbackStateListener = object : PlaybackStateListener {
+        override fun onPlaybackStateChanged(state: PlaybackState) {
+            mainHandler.post {
+                updatePlayButtonState(state)
+            }
+        }
+    }
+    private fun updatePlayButtonState(state: PlaybackState) {
+        val resourceId = when (state) {
+            PlaybackState.IDLE, PlaybackState.PAUSED, PlaybackState.ERROR -> R.drawable.ic_play
+            PlaybackState.PREPARING, PlaybackState.PLAYING -> R.drawable.stop
+        }
+
+        // 强制刷新图片资源
+        iv_play.setImageResource(0) // 先清空
+        iv_play.setImageResource(resourceId) // 再设置新资源
+
+        Log.d("PlaybackState", "状态: $state，设置资源: $resourceId")
+        Log.d("PlaybackState", "iv_play是否初始化: ${::iv_play.isInitialized}")
+    }
+//---------------------------------------------------------------
 
     override fun getLayoutId(): Int {
         return R.layout.activity_main
@@ -45,6 +72,12 @@ class MainActivity : Nav() {
         iv_album_cover = findViewById(R.id.iv_album_cover)
         tv_song_name = findViewById(R.id.tv_song_name)
         iv_play = findViewById<ImageView>(R.id.iv_play)
+
+
+        registerPlaybackStateListener(playbackStateListener)
+
+
+
 
 
         // 从SharedPreferences中读取数据
@@ -104,6 +137,8 @@ class MainActivity : Nav() {
 
 
 
+        val currentState = getCurrentPlaybackState() // 获取当前播放状态
+        playbackStateListener.onPlaybackStateChanged(currentState)
     }
 
     // 初始化视图组件
@@ -183,11 +218,11 @@ class MainActivity : Nav() {
             }
         })
         val t = (1..4).random()
-        Get_Network_Music(t,object :MusicCallback{
+        Get_Network_Music(t, object : MusicCallback {
             @SuppressLint("WrongViewCast")
             override fun onSuccess(musicList: ArrayList<Music>) {
                 musiclist2 = musicList
-                val adapter = TitleAdapterDay(musiclist2,{ music ->
+                val adapter = TitleAdapterDay(musiclist2, { music ->
                     val intent = Intent(this@MainActivity, MusicPlayerActivity::class.java)
                     intent.putExtra("music_name", music.song)
                     intent.putExtra("music_singer", music.sing)
@@ -217,7 +252,8 @@ class MainActivity : Nav() {
                 })
                 val rv_day = findViewById<RecyclerView>(R.id.rv_day)
                 rv_day.adapter = adapter
-                val layoutManager = GridLayoutManager(this@MainActivity, 3, GridLayoutManager.HORIZONTAL, false)
+                val layoutManager =
+                    GridLayoutManager(this@MainActivity, 3, GridLayoutManager.HORIZONTAL, false)
                 rv_day.layoutManager = layoutManager
                 adapter.notifyDataSetChanged()
             }
@@ -227,6 +263,15 @@ class MainActivity : Nav() {
             }
 
         })
+    }
+
+    ///进入页面时触发一次监听
+    private fun getCurrentPlaybackState(): PlaybackState {
+        return if (getYesOrNo()) { // 假设isMusicPlaying()是判断当前是否在播放的方法
+            PlaybackState.PLAYING
+        } else {
+            PlaybackState.PAUSED
+        }
     }
 
     // 观察ViewModel数据变化
@@ -287,6 +332,7 @@ class MainActivity : Nav() {
 
     override fun onDestroy() {
         super.onDestroy()
+        unregisterPlaybackStateListener(playbackStateListener)
         getSharedPreferences("data", Context.MODE_PRIVATE).unregisterOnSharedPreferenceChangeListener(sharedPreferenceChangeListener)
     }
 }

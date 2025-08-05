@@ -2,6 +2,9 @@ package com.example.musicapp
 
 import android.content.Context
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.util.Log
 import android.util.TypedValue
 import android.view.View
 import android.view.animation.AnimationUtils
@@ -19,6 +22,31 @@ class MusicPlayerActivity : AppCompatActivity() {
     lateinit var tvArtist: TextView
     lateinit var rootView: View
     lateinit var ivDown: ImageView  // iv_down图标
+    lateinit var iv_play_pause : ImageView
+    //处理播放播放控制栏的图标切换
+//----------------------------------------------------------
+    private val mainHandler = Handler(Looper.getMainLooper())
+    private val playbackStateListener = object : PlaybackStateListener {
+        override fun onPlaybackStateChanged(state: PlaybackState) {
+            mainHandler.post {
+                updatePlayButtonState(state)
+            }
+        }
+    }
+    private fun updatePlayButtonState(state: PlaybackState) {
+        val resourceId = when (state) {
+            PlaybackState.IDLE, PlaybackState.PAUSED, PlaybackState.ERROR -> R.drawable.ic_play
+            PlaybackState.PREPARING, PlaybackState.PLAYING -> R.drawable.stop
+        }
+
+        // 强制刷新图片资源
+        iv_play_pause.setImageResource(0) // 先清空
+        iv_play_pause.setImageResource(resourceId) // 再设置新资源
+
+        Log.d("PlaybackState1", "状态: $state，设置资源: $resourceId")
+        Log.d("PlaybackState1", "iv_play是否初始化: ${::iv_play_pause.isInitialized}")
+    }
+//---------------------------------------------------------------
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,23 +60,38 @@ class MusicPlayerActivity : AppCompatActivity() {
         tvSongName = findViewById(R.id.tv_song_name)
         tvArtist = findViewById(R.id.tv_artist)
         ivDown = findViewById(R.id.iv_down)  // 绑定iv_down图标
+        iv_play_pause = findViewById<ImageView>(R.id.iv_play_pause)
+
+
 
         // 读取缓存数据
         val prefs = getSharedPreferences("data", Context.MODE_PRIVATE)
         val song = prefs.getString("song", "")
         val sing = prefs.getString("sing", "")
         val pic = prefs.getString("pic_url", "").toString()
+        val url = prefs.getString("music_url","").toString()
+
+        iv_play_pause.setOnClickListener {
+            stop_Or_start(url)
+        }
         tvSongName.text = song
         tvArtist.text = sing
         loadAlbumCover(pic)
+        registerPlaybackStateListener(playbackStateListener)
 
-        // 移除backString的触摸事件监听逻辑
-
-        // 移除backString的点击事件监听逻辑
-
-        // iv_down图标的点击事件（保留）
         ivDown.setOnClickListener {
             exitWithAnimation()
+        }
+        val currentState = getCurrentPlaybackState() // 获取当前播放状态
+        playbackStateListener.onPlaybackStateChanged(currentState)
+    }
+
+    ///进入页面时触发一次监听
+    private fun getCurrentPlaybackState(): PlaybackState {
+        return if (getYesOrNo()) { // 假设isMusicPlaying()是判断当前是否在播放的方法
+            PlaybackState.PLAYING
+        } else {
+            PlaybackState.PAUSED
         }
     }
 
@@ -88,5 +131,6 @@ class MusicPlayerActivity : AppCompatActivity() {
     override fun onBackPressed() {
         exitWithAnimation()
         super.onBackPressed()
+        unregisterPlaybackStateListener(playbackStateListener)
     }
 }

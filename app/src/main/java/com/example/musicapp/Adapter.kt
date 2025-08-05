@@ -29,11 +29,7 @@ class TitleAdapter(
         return ViewHolder(view).apply {
             itemView.setOnClickListener {
                 val music = musicList[adapterPosition]
-                onItemClickListener(music) // 回调点击事件
-                playAudio(music.url)
-            }
-            music_item_play.setOnClickListener {
-                val music = musicList[adapterPosition]
+                onItemClickListener(music)
                 stop_Or_start(music.url)
             }
         }
@@ -111,10 +107,6 @@ class TitleAdapterDay(
             itemView.setOnClickListener {
                 val music = musicList[adapterPosition]
                 onItemClickListener(music) // 回调点击事件
-                playAudio(music.url)
-            }
-            music_item_play.setOnClickListener {
-                val music = musicList[adapterPosition]
                 stop_Or_start(music.url)
             }
         }

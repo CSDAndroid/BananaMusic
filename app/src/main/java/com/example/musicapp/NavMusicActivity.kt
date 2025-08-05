@@ -5,6 +5,8 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.widget.ImageView
 import android.widget.TextView
@@ -29,7 +31,30 @@ class NavMusicActivity : Nav() {
     private lateinit var tv_song_name: TextView
     private lateinit var iv_play : ImageView
     private lateinit var rv_song : RecyclerView
+    //处理播放播放控制栏的图标切换
+//----------------------------------------------------------
+    private val mainHandler = Handler(Looper.getMainLooper())
+    private val playbackStateListener = object : PlaybackStateListener {
+        override fun onPlaybackStateChanged(state: PlaybackState) {
+            mainHandler.post {
+                updatePlayButtonState(state)
+            }
+        }
+    }
+    private fun updatePlayButtonState(state: PlaybackState) {
+        val resourceId = when (state) {
+            PlaybackState.IDLE, PlaybackState.PAUSED, PlaybackState.ERROR -> R.drawable.ic_play
+            PlaybackState.PREPARING, PlaybackState.PLAYING -> R.drawable.stop
+        }
 
+        // 强制刷新图片资源
+        iv_play.setImageResource(0) // 先清空
+        iv_play.setImageResource(resourceId) // 再设置新资源
+
+        Log.d("PlaybackState", "状态: $state，设置资源: $resourceId")
+        Log.d("PlaybackState", "iv_play是否初始化: ${::iv_play.isInitialized}")
+    }
+//---------------------------------------------------------------
 
 
     override fun getLayoutId(): Int {
@@ -78,6 +103,17 @@ class NavMusicActivity : Nav() {
             val t = (1..4).random()
             loadmusic(t)
             swipeRefreshLayout.isRefreshing = false
+        }
+        val currentState = getCurrentPlaybackState() // 获取当前播放状态
+        playbackStateListener.onPlaybackStateChanged(currentState)
+    }
+
+    ///进入页面时触发一次监听
+    private fun getCurrentPlaybackState(): PlaybackState {
+        return if (getYesOrNo()) { // 假设isMusicPlaying()是判断当前是否在播放的方法
+            PlaybackState.PLAYING
+        } else {
+            PlaybackState.PAUSED
         }
     }
 
