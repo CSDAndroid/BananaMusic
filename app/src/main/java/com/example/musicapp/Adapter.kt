@@ -1,5 +1,6 @@
 package com.example.musicapp
 
+import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -124,4 +125,38 @@ class TitleAdapterDay(
     }
 
     override fun getItemCount() = musicList.size
+}
+
+class LyricAdapter(private val lyrics: List<LyricLine>) : RecyclerView.Adapter<LyricAdapter.LyricViewHolder>(){
+    private var currentLineIndex = -1
+
+    override fun onCreateViewHolder(
+        parent: ViewGroup,
+        viewType: Int
+    ): LyricViewHolder {
+        val view = LayoutInflater.from(parent.context).inflate(R.layout.lyric_item,parent,false)
+        val lyricViewHolder = LyricViewHolder(view)
+        return lyricViewHolder
+    }
+
+    override fun onBindViewHolder(
+        holder: LyricViewHolder,
+        position: Int
+    ) {
+        holder.tvLyric.text = lyrics[position].text
+        if (position == currentLineIndex){
+            holder.tvLyric.setTextColor(Color.GREEN)
+        }else{
+            holder.tvLyric.setTextColor(Color.BLACK)
+        }
+    }
+
+    override fun getItemCount(): Int = lyrics.size
+    inner class LyricViewHolder(itemview : View): RecyclerView.ViewHolder(itemview){
+        val tvLyric: TextView = itemView.findViewById(R.id.tvLyric)
+    }
+    fun setCurrentLineIndex(index: Int) {
+        currentLineIndex = index
+        notifyDataSetChanged()
+    }
 }

@@ -13,13 +13,13 @@
     <ImageView
         android:id="@+id/iv_down"
         android:layout_width="30dp"
-    android:layout_height="30dp"
-    android:src="@drawable/down"
-    android:scaleType="centerInside"
-    android:layout_marginBottom="40dp"
-    app:layout_constraintBottom_toTopOf="@id/album_cover"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintStart_toStartOf="parent" />
+        android:layout_height="30dp"
+        android:src="@drawable/down"
+        android:scaleType="centerInside"
+        android:layout_marginBottom="40dp"
+        app:layout_constraintBottom_toTopOf="@id/album_cover"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <!-- 专辑封面（原有） -->
     <ImageView
@@ -56,35 +56,25 @@
         android:gravity="center"
         android:text="周杰伦"
         android:textSize="18sp"
-        app:layout_constraintBottom_toTopOf="@id/tv_lyric_current"
+        app:layout_constraintBottom_toTopOf="@id/lyric_rv"
         app:layout_constraintStart_toStartOf="parent" />
 
-    <!-- 歌词区（原有） -->
-    <TextView
-        android:id="@+id/tv_lyric_current"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:text="从前从前 有个人爱你很久"
-        android:textColor="#333333"
-        android:textSize="18sp"
-        app:layout_constraintBottom_toTopOf="@id/tv_lyric_next"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+    <!-- 歌词区（修改） -->
 
-    <TextView
-        android:id="@+id/tv_lyric_next"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:text="但偏偏 风渐渐 把距离吹得好远"
-        android:textColor="#999999"
-        android:textSize="16sp"
-        app:layout_constraintBottom_toTopOf="@id/layout_functions"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
 
     <!-- 功能按钮区（原有） -->
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/lyric_rv"
+        android:layout_width="match_parent"
+        android:layout_height="120dp"
+        app:layout_constraintBottom_toTopOf="@id/layout_functions"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0" />
+
     <LinearLayout
         android:id="@+id/layout_functions"
         android:layout_width="match_parent"

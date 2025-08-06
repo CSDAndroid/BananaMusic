@@ -5,12 +5,16 @@ import android.media.MediaPlayer
 import android.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 
 private var mediaPlayer: MediaPlayer? = null
 private var playbackState = PlaybackState.IDLE
+private val playbackTimeUpdateInterval = 1000L // 更新间隔为1秒
+private var playbackTimeUpdateJob: Job? = null
 private var retryCount = 0
 private var Is_play = ""
 private var YesOrNo = false
@@ -22,6 +26,7 @@ enum class PlaybackState { IDLE, PREPARING, PLAYING, PAUSED, ERROR }
 
 interface PlaybackStateListener {
     fun onPlaybackStateChanged(state: PlaybackState)
+    fun onPlaybackTimeChanged(currentTime: Int)
 }
 fun registerPlaybackStateListener(listener: PlaybackStateListener) {
     playbackStateListeners.add(listener)
@@ -75,6 +80,7 @@ fun playAudio(url: String) {
                         mp.start()
                         playbackState = PlaybackState.PLAYING
                         Log.d("data2", "开始播放")
+                        startPlaybackTimeUpdates()
                     }
                 }
             }
@@ -90,6 +96,22 @@ fun playAudio(url: String) {
             playbackState = PlaybackState.ERROR
             releasePlayer()
         }
+    }
+}
+private fun startPlaybackTimeUpdates() {
+    playbackTimeUpdateJob?.cancel()
+    playbackTimeUpdateJob = CoroutineScope(Dispatchers.Main).launch {
+        while (playbackState == PlaybackState.PLAYING) {
+            val currentTime = mediaPlayer?.currentPosition ?: 0
+            notifyPlaybackTimeChange(currentTime)
+            delay(playbackTimeUpdateInterval)
+        }
+    }
+}
+
+private fun notifyPlaybackTimeChange(currentTime: Int) {
+    playbackStateListeners.forEach { listener ->
+        listener.onPlaybackTimeChanged(currentTime)
     }
 }
 
@@ -113,11 +135,14 @@ fun stop_Or_start(url: String){
             notifyPlaybackStateChange()
             Log.d("data2", "暂停播放$Is_play")
             YesOrNo = false
+
         } else{
             mediaPlayer?.start()
             playbackState = PlaybackState.PLAYING
             notifyPlaybackStateChange()
             Log.d("data2", "继续播放$Is_play")
+
+            startPlaybackTimeUpdates()
         }
     }else{
         playAudio(url)

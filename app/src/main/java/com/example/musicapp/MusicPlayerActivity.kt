@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
-import android.util.TypedValue
 import android.view.View
 import android.view.animation.AnimationUtils
 import android.widget.ImageView
@@ -13,18 +12,24 @@ import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.edit
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.example.musicapp.network.Getlyric
 
 class MusicPlayerActivity : AppCompatActivity() {
-    // 视图变量（移除backString相关声明）
+    // 视图变量
     lateinit var albumCover: ImageView
     lateinit var tvSongName: TextView
     lateinit var tvArtist: TextView
     lateinit var rootView: View
-    lateinit var ivDown: ImageView  // iv_down图标
-    lateinit var iv_play_pause : ImageView
-    //处理播放播放控制栏的图标切换
-//----------------------------------------------------------
+    lateinit var ivDown: ImageView
+    lateinit var iv_play_pause: ImageView
+    lateinit var lyrics: List<LyricLine>
+    lateinit var lyric_rv: RecyclerView
+    lateinit var lyricAdapter: LyricAdapter
+
+    // 播放器相关
     private val mainHandler = Handler(Looper.getMainLooper())
     private val playbackStateListener = object : PlaybackStateListener {
         override fun onPlaybackStateChanged(state: PlaybackState) {
@@ -32,21 +37,31 @@ class MusicPlayerActivity : AppCompatActivity() {
                 updatePlayButtonState(state)
             }
         }
+
+        override fun onPlaybackTimeChanged(currentTime: Int) {
+            mainHandler.post {
+                updateLyrics(currentTime)
+            }
+        }
     }
+
     private fun updatePlayButtonState(state: PlaybackState) {
         val resourceId = when (state) {
             PlaybackState.IDLE, PlaybackState.PAUSED, PlaybackState.ERROR -> R.drawable.ic_play
             PlaybackState.PREPARING, PlaybackState.PLAYING -> R.drawable.stop
         }
 
-        // 强制刷新图片资源
-        iv_play_pause.setImageResource(0) // 先清空
-        iv_play_pause.setImageResource(resourceId) // 再设置新资源
-
+        iv_play_pause.setImageResource(resourceId)
         Log.d("PlaybackState1", "状态: $state，设置资源: $resourceId")
-        Log.d("PlaybackState1", "iv_play是否初始化: ${::iv_play_pause.isInitialized}")
     }
-//---------------------------------------------------------------
+
+    private fun updateLyrics(currentTime: Int) {
+        val currentLineIndex = lyrics.indexOfFirst { it.time > currentTime } - 1
+        if (currentLineIndex in lyrics.indices) {
+            lyricAdapter.setCurrentLineIndex(currentLineIndex)
+            lyric_rv.scrollToPosition(currentLineIndex)
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,22 +69,22 @@ class MusicPlayerActivity : AppCompatActivity() {
         setContentView(R.layout.activity_music_player)
         supportActionBar?.hide()
 
-        // 绑定视图（移除backString的初始化）
+        // 绑定视图
         rootView = findViewById(R.id.main_player)
         albumCover = findViewById(R.id.album_cover)
         tvSongName = findViewById(R.id.tv_song_name)
         tvArtist = findViewById(R.id.tv_artist)
-        ivDown = findViewById(R.id.iv_down)  // 绑定iv_down图标
-        iv_play_pause = findViewById<ImageView>(R.id.iv_play_pause)
-
-
+        ivDown = findViewById(R.id.iv_down)
+        iv_play_pause = findViewById(R.id.iv_play_pause)
+        lyric_rv = findViewById(R.id.lyric_rv)
 
         // 读取缓存数据
         val prefs = getSharedPreferences("data", Context.MODE_PRIVATE)
         val song = prefs.getString("song", "")
         val sing = prefs.getString("sing", "")
+        val id = prefs.getLong("music_id", 1456890009).toString()
         val pic = prefs.getString("pic_url", "").toString()
-        val url = prefs.getString("music_url","").toString()
+        val url = prefs.getString("music_url", "").toString()
 
         iv_play_pause.setOnClickListener {
             stop_Or_start(url)
@@ -82,20 +97,19 @@ class MusicPlayerActivity : AppCompatActivity() {
         ivDown.setOnClickListener {
             exitWithAnimation()
         }
-        val currentState = getCurrentPlaybackState() // 获取当前播放状态
-        playbackStateListener.onPlaybackStateChanged(currentState)
-    }
 
-    ///进入页面时触发一次监听
-    private fun getCurrentPlaybackState(): PlaybackState {
-        return if (getYesOrNo()) { // 假设isMusicPlaying()是判断当前是否在播放的方法
-            PlaybackState.PLAYING
-        } else {
-            PlaybackState.PAUSED
+        // 获取歌词
+        Getlyric.getlyric(id) { lyric ->
+            runOnUiThread {
+                val lyricsText = lyric
+                lyrics = parseLyrics(lyricsText)
+                lyric_rv.layoutManager = LinearLayoutManager(this)
+                lyricAdapter = LyricAdapter(lyrics)
+                lyric_rv.adapter = lyricAdapter
+            }
         }
     }
 
-    // 加载专辑封面（保留）
     private fun loadAlbumCover(picUrl: String) {
         Glide.with(this)
             .load(picUrl)
@@ -104,7 +118,6 @@ class MusicPlayerActivity : AppCompatActivity() {
             .into(albumCover)
     }
 
-    // 执行退出动画并关闭Activity（保留）
     private fun exitWithAnimation() {
         val exitAnim = AnimationUtils.loadAnimation(this, R.anim.slide_out_down)
         rootView.startAnimation(exitAnim)
@@ -118,16 +131,6 @@ class MusicPlayerActivity : AppCompatActivity() {
         })
     }
 
-    // 像素转DP（保留，如需其他滑动逻辑可复用）
-    private fun pxToDp(px: Int): Int {
-        return TypedValue.applyDimension(
-            TypedValue.COMPLEX_UNIT_DIP,
-            px.toFloat(),
-            resources.displayMetrics
-        ).toInt()
-    }
-
-    // 返回键逻辑（保留）
     override fun onBackPressed() {
         exitWithAnimation()
         super.onBackPressed()

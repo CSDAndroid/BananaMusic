@@ -43,6 +43,9 @@ class MainActivity : Nav() {
                 updatePlayButtonState(state)
             }
         }
+
+        override fun onPlaybackTimeChanged(currentTime: Int) {
+        }
     }
     private fun updatePlayButtonState(state: PlaybackState) {
         val resourceId = when (state) {
