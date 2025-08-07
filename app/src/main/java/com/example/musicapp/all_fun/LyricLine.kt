@@ -1,4 +1,4 @@
-package com.example.musicapp
+package com.example.musicapp.all_fun
 
 data class LyricLine(val time: Long, val text: String)
 

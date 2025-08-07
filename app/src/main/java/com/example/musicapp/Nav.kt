@@ -14,6 +14,11 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.example.musicapp.activity.MainActivity
+import com.example.musicapp.activity.MineActivity
+import com.example.musicapp.activity.MusicPlayerActivity
+import com.example.musicapp.activity.NavMusicActivity
+
 
 abstract class Nav : AppCompatActivity() {
 

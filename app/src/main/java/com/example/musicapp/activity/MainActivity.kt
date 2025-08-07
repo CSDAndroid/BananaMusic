@@ -1,14 +1,11 @@
-package com.example.musicapp
+package com.example.musicapp.activity
 
 import android.annotation.SuppressLint
-import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
-import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
-import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.content.edit
@@ -17,6 +14,21 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.example.musicapp.ActionbarViewModel
+
+import com.example.musicapp.Music
+import com.example.musicapp.MusicBarManager
+import com.example.musicapp.Nav
+import com.example.musicapp.R
+import com.example.musicapp.adapter.ActionbarAdapter1
+import com.example.musicapp.adapter.HistoryAdapter
+import com.example.musicapp.adapter.TitleAdapterDay
+import com.example.musicapp.all_fun.PlaybackState
+import com.example.musicapp.all_fun.PlaybackStateListener
+import com.example.musicapp.all_fun.getYesOrNo
+import com.example.musicapp.all_fun.registerPlaybackStateListener
+import com.example.musicapp.all_fun.stop_Or_start
+import com.example.musicapp.all_fun.unregisterPlaybackStateListener
 import com.example.musicapp.network.Get_Network_Music
 import com.example.musicapp.network.MusicCallback
 
@@ -29,7 +41,7 @@ class MainActivity : Nav() {
     private lateinit var iv_album_cover: ImageView
 
     private lateinit var tv_song_name: TextView
-    private lateinit var mainViewModel: MainViewModel
+
     private lateinit var iv_play : ImageView
     private lateinit var actionbarViewModel: ActionbarViewModel
     // 适配器实例
@@ -70,7 +82,7 @@ class MainActivity : Nav() {
         supportActionBar?.hide()
 
         // 初始化Actionbar相关组件
-        mainViewModel = ViewModelProvider(this)[MainViewModel::class.java]
+
         actionbarViewModel = ViewModelProvider(this)[ActionbarViewModel::class.java]
         iv_album_cover = findViewById(R.id.iv_album_cover)
         tv_song_name = findViewById(R.id.tv_song_name)
@@ -84,7 +96,7 @@ class MainActivity : Nav() {
 
 
         // 从SharedPreferences中读取数据
-        val prefs = getSharedPreferences("data", Context.MODE_PRIVATE)
+        val prefs = getSharedPreferences("data", MODE_PRIVATE)
         prefs.registerOnSharedPreferenceChangeListener(sharedPreferenceChangeListener)
         val song = prefs.getString("song", "") ?: ""
         val sing = prefs.getString("sing", "1") ?: ""
@@ -283,14 +295,7 @@ class MainActivity : Nav() {
         actionbarViewModel.actionItems.observe(this) { items ->
             actionbarAdapter.submitList(items)
         }
-
-        // 观察网络请求状态
-        mainViewModel.requestStatus.observe(this) { isCompleted ->
-            if (isCompleted) {
-                // 可添加加载框隐藏逻辑
-            }
-        }
-
+        
         // 观察导航栏选中位置（从ViewModel恢复状态）
         actionbarViewModel.selectedPosition.observe(this) { position ->
             if (position != -1) {
@@ -336,7 +341,7 @@ class MainActivity : Nav() {
     override fun onDestroy() {
         super.onDestroy()
         unregisterPlaybackStateListener(playbackStateListener)
-        getSharedPreferences("data", Context.MODE_PRIVATE).unregisterOnSharedPreferenceChangeListener(sharedPreferenceChangeListener)
+        getSharedPreferences("data", MODE_PRIVATE).unregisterOnSharedPreferenceChangeListener(sharedPreferenceChangeListener)
     }
 }
 

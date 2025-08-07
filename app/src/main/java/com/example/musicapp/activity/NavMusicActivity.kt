@@ -1,4 +1,4 @@
-package com.example.musicapp
+package com.example.musicapp.activity
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -15,13 +15,18 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.bumptech.glide.Glide
-import com.example.musicapp.network.ApiResponse
+import com.example.musicapp.Music
+import com.example.musicapp.MusicBarManager
+import com.example.musicapp.Nav
+import com.example.musicapp.R
+import com.example.musicapp.adapter.ContentAdapter
+import com.example.musicapp.all_fun.PlaybackState
+import com.example.musicapp.all_fun.PlaybackStateListener
+import com.example.musicapp.all_fun.getYesOrNo
+import com.example.musicapp.all_fun.stop_Or_start
 import com.example.musicapp.network.Get_Network_Music
 import com.example.musicapp.network.MusicCallback
-import com.example.musicapp.network.RetrofitInstance
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+
 
 
 class NavMusicActivity : Nav() {
@@ -78,7 +83,7 @@ class NavMusicActivity : Nav() {
 
 
 
-        val prefs = getSharedPreferences("data", Context.MODE_PRIVATE)
+        val prefs = getSharedPreferences("data", MODE_PRIVATE)
         prefs.registerOnSharedPreferenceChangeListener(sharedPreferenceChangeListener)
         var yesOrNo = false
 
@@ -125,13 +130,13 @@ class NavMusicActivity : Nav() {
         Get_Network_Music(t,object : MusicCallback {
             override fun onSuccess(musicList: ArrayList<Music>) {
                 musiclist1 = musicList
-                val adapter = ContentAdapter(musiclist1,{music ->
+                val adapter = ContentAdapter(musiclist1, { music ->
                     loadAlbumCover(music.pic)
                     tv_song_name.text = music.song
-                    getSharedPreferences("data",MODE_PRIVATE).edit{
-                        putString("song","${music.song}")
-                        putString("sing","${music.sing}")
-                        putString("pic_url","${music.pic}")
+                    getSharedPreferences("data", MODE_PRIVATE).edit {
+                        putString("song", "${music.song}")
+                        putString("sing", "${music.sing}")
+                        putString("pic_url", "${music.pic}")
                         putLong("music_id", music.id)
                         putString("music_url", "${music.url}")
                     }

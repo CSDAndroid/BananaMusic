@@ -1,16 +1,18 @@
-package com.example.musicapp
+package com.example.musicapp.adapter
 
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.example.musicapp.Music
+import com.example.musicapp.R
+import com.example.musicapp.all_fun.playAudio
 
-class HistoryAdapter(private val musiclist : List<Music>,private val onItemClickListener: (Music) -> Unit) : RecyclerView.Adapter<HistoryAdapter.ViewHolder>(){
+
+class HistoryAdapter(private val musiclist : List<Music>, private val onItemClickListener: (Music) -> Unit) : RecyclerView.Adapter<HistoryAdapter.ViewHolder>(){
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int

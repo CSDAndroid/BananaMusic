@@ -1,30 +1,24 @@
-package com.example.musicapp
+package com.example.musicapp.activity
 
 
 import android.annotation.SuppressLint
-import android.content.Context
-import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log
 import android.widget.ImageView
-import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.cardview.widget.CardView
 import androidx.core.content.edit
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.bumptech.glide.Glide
-import com.example.musicapp.network.ApiResponse
+import com.example.musicapp.Music
+import com.example.musicapp.R
+import com.example.musicapp.adapter.TitleAdapter
 import com.example.musicapp.network.Get_Network_Music
 import com.example.musicapp.network.MusicCallback
-import com.example.musicapp.network.RetrofitInstance
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
-import kotlin.math.log
+
 
 class AlbumListActivity : AppCompatActivity() {
     private lateinit var  iv_album_cover : ImageView
@@ -56,7 +50,7 @@ class AlbumListActivity : AppCompatActivity() {
         tv_song_name = findViewById<TextView>(R.id.tv_song_name)
 
 
-        val prefs = getSharedPreferences("data", Context.MODE_PRIVATE)
+        val prefs = getSharedPreferences("data", MODE_PRIVATE)
         val song = prefs.getString("song","").toString()
         val sing = prefs.getString("sing","")
         val pic = prefs.getString("pic_url","").toString()
@@ -92,7 +86,7 @@ class AlbumListActivity : AppCompatActivity() {
                         putLong("music_id", music.id)
                         putString("music_url", "${music.url}")
                     }
-                    val prefs = getSharedPreferences("data", Context.MODE_PRIVATE)
+                    val prefs = getSharedPreferences("data", MODE_PRIVATE)
                     val song = prefs.getString("song", "").toString()
                     val url = prefs.getString("music_url", "")
                     Log.e("data5", "onCreate: $url $song",)

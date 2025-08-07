@@ -17,21 +17,21 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
-            android:name=".NavMusicActivity"
+            android:name=".activity.NavMusicActivity"
             android:exported="false"
             android:theme="@style/Theme.MusicApp.NoAnimation" />
         <activity
-            android:name=".MineActivity"
+            android:name=".activity.MineActivity"
             android:exported="false"
             android:theme="@style/Theme.MusicApp.NoAnimation" />
         <activity
-            android:name=".AlbumListActivity"
+            android:name=".activity.AlbumListActivity"
             android:exported="false" />
         <activity
-            android:name=".MusicPlayerActivity"
+            android:name=".activity.MusicPlayerActivity"
             android:exported="false" />
         <activity
-            android:name=".MainActivity"
+            android:name=".activity.MainActivity"
             android:exported="true"
             android:theme="@style/Theme.MusicApp.NoAnimation">
             <intent-filter>

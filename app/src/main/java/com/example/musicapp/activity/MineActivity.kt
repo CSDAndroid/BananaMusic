@@ -1,4 +1,4 @@
-package com.example.musicapp
+package com.example.musicapp.activity
 
 import android.content.Context
 import android.content.SharedPreferences
@@ -9,6 +9,15 @@ import android.util.Log
 import android.widget.ImageView
 import android.widget.TextView
 import com.bumptech.glide.Glide
+import com.example.musicapp.MusicBarManager
+import com.example.musicapp.Nav
+import com.example.musicapp.R
+import com.example.musicapp.all_fun.PlaybackState
+import com.example.musicapp.all_fun.PlaybackStateListener
+import com.example.musicapp.all_fun.getYesOrNo
+import com.example.musicapp.all_fun.registerPlaybackStateListener
+import com.example.musicapp.all_fun.stop_Or_start
+
 
 class MineActivity : Nav() {
     private lateinit var iv_play : ImageView
@@ -59,7 +68,7 @@ class MineActivity : Nav() {
 
 
         // 从SharedPreferences中读取数据
-        val prefs = getSharedPreferences("data", Context.MODE_PRIVATE)
+        val prefs = getSharedPreferences("data", MODE_PRIVATE)
         prefs.registerOnSharedPreferenceChangeListener(sharedPreferenceChangeListener)
         val song = prefs.getString("song", "") ?: ""
         val sing = prefs.getString("sing", "1") ?: ""

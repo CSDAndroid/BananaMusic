@@ -1,6 +1,5 @@
-package com.example.musicapp
+package com.example.musicapp.all_fun
 
-import android.content.Intent
 import android.media.MediaPlayer
 import android.util.Log
 import kotlinx.coroutines.CoroutineScope

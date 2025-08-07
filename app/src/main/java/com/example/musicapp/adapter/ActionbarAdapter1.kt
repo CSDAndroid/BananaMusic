@@ -1,4 +1,4 @@
-package com.example.musicapp
+package com.example.musicapp.adapter
 
 import android.graphics.Color
 import android.view.LayoutInflater
@@ -8,6 +8,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.example.musicapp.R
 
 // 使用ListAdapter优化数据更新，泛型为数据类型String
 class ActionbarAdapter1 : ListAdapter<String, ActionbarAdapter1.ViewHolder1>(ActionbarDiffCallback()) {

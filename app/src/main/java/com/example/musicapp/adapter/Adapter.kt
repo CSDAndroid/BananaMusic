@@ -1,4 +1,4 @@
-package com.example.musicapp
+package com.example.musicapp.adapter
 
 import android.graphics.Color
 import android.view.LayoutInflater
@@ -12,6 +12,11 @@ import androidx.fragment.app.FragmentActivity
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.bumptech.glide.Glide
+import com.example.musicapp.Music
+import com.example.musicapp.R
+import com.example.musicapp.all_fun.LyricLine
+import com.example.musicapp.all_fun.playAudio
+import com.example.musicapp.all_fun.stop_Or_start
 
 class TitleAdapter(
     private val musicList: ArrayList<Music>,

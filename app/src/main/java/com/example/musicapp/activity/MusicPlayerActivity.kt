@@ -1,4 +1,4 @@
-package com.example.musicapp
+package com.example.musicapp.activity
 
 import android.content.Context
 import android.graphics.Bitmap
@@ -9,6 +9,7 @@ import android.os.Looper
 import android.util.Log
 import android.view.View
 import android.animation.ValueAnimator
+import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.ImageView
 import android.widget.TextView
@@ -20,7 +21,19 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.SimpleTarget
 import com.bumptech.glide.request.transition.Transition
+import com.example.musicapp.ColorExtractor
+import com.example.musicapp.R
+import com.example.musicapp.adapter.LyricAdapter
+import com.example.musicapp.all_fun.LyricLine
+import com.example.musicapp.all_fun.PlaybackState
+import com.example.musicapp.all_fun.PlaybackStateListener
+import com.example.musicapp.all_fun.parseLyrics
+import com.example.musicapp.all_fun.registerPlaybackStateListener
+import com.example.musicapp.all_fun.stop_Or_start
+import com.example.musicapp.all_fun.unregisterPlaybackStateListener
 import com.example.musicapp.network.Getlyric
+
+
 
 class MusicPlayerActivity : AppCompatActivity() {
     // 视图变量
@@ -84,7 +97,7 @@ class MusicPlayerActivity : AppCompatActivity() {
         lyric_rv = findViewById(R.id.lyric_rv)
 
         // 读取缓存数据
-        val prefs = getSharedPreferences("data", Context.MODE_PRIVATE)
+        val prefs = getSharedPreferences("data", MODE_PRIVATE)
         val song = prefs.getString("song", "")
         val sing = prefs.getString("sing", "")
         val id = prefs.getLong("music_id", 1456890009).toString()
@@ -182,13 +195,13 @@ class MusicPlayerActivity : AppCompatActivity() {
     private fun exitWithAnimation() {
         val exitAnim = AnimationUtils.loadAnimation(this, R.anim.slide_out_down)
         rootView.startAnimation(exitAnim)
-        exitAnim.setAnimationListener(object : android.view.animation.Animation.AnimationListener {
-            override fun onAnimationStart(animation: android.view.animation.Animation?) {}
-            override fun onAnimationEnd(animation: android.view.animation.Animation?) {
+        exitAnim.setAnimationListener(object : Animation.AnimationListener {
+            override fun onAnimationStart(animation: Animation?) {}
+            override fun onAnimationEnd(animation: Animation?) {
                 finish()
                 overridePendingTransition(0, 0)
             }
-            override fun onAnimationRepeat(animation: android.view.animation.Animation?) {}
+            override fun onAnimationRepeat(animation: Animation?) {}
         })
     }
 
