@@ -1,11 +1,14 @@
 package com.example.musicapp
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.view.View
+import android.animation.ValueAnimator
 import android.view.animation.AnimationUtils
 import android.widget.ImageView
 import android.widget.TextView
@@ -15,6 +18,8 @@ import androidx.core.content.edit
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.request.target.SimpleTarget
+import com.bumptech.glide.request.transition.Transition
 import com.example.musicapp.network.Getlyric
 
 class MusicPlayerActivity : AppCompatActivity() {
@@ -112,10 +117,66 @@ class MusicPlayerActivity : AppCompatActivity() {
 
     private fun loadAlbumCover(picUrl: String) {
         Glide.with(this)
+            .asBitmap()
             .load(picUrl)
             .placeholder(R.drawable.music)
             .error(R.drawable.music)
-            .into(albumCover)
+            .into(object : SimpleTarget<Bitmap>() {
+                override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
+                    // 设置专辑封面
+                    albumCover.setImageBitmap(resource)
+                    
+                    // 提取主色调并应用到背景
+                    applyColorToBackground(resource)
+                }
+            })
+    }
+    
+    /**
+     * 从专辑封面提取颜色并应用到背景
+     */
+    private fun applyColorToBackground(bitmap: Bitmap) {
+        try {
+            // 提取主色调
+            val dominantColor = ColorExtractor.extractDominantColor(bitmap)
+            
+            // 创建简单的纯色背景（浅色系）
+            val backgroundDrawable = GradientDrawable()
+            backgroundDrawable.shape = GradientDrawable.RECTANGLE
+            backgroundDrawable.setColor(dominantColor)
+            backgroundDrawable.cornerRadius = 0f // 无圆角
+            
+            // 应用背景到根视图，带动画效果
+            applyBackgroundWithAnimation(backgroundDrawable)
+            
+            Log.d("MusicPlayerActivity", "背景颜色已更新: ${String.format("#%06X", dominantColor)}")
+            
+        } catch (e: Exception) {
+            Log.e("MusicPlayerActivity", "应用背景颜色时发生错误", e)
+            // 如果出错，使用默认背景
+            rootView.setBackgroundResource(R.drawable.frosted_glass)
+        }
+    }
+    
+    /**
+     * 带动画效果应用背景
+     */
+    private fun applyBackgroundWithAnimation(newGradient: GradientDrawable) {
+        // 创建透明度动画
+        val alphaAnimator = ValueAnimator.ofFloat(0f, 1f)
+        alphaAnimator.duration = 800 // 800毫秒
+        
+        alphaAnimator.addUpdateListener { animator ->
+            val alpha = animator.animatedValue as Float
+            newGradient.alpha = (alpha * 255).toInt()
+            
+            // 在动画过程中应用背景
+            if (rootView.background == null) {
+                rootView.background = newGradient
+            }
+        }
+        
+        alphaAnimator.start()
     }
 
     private fun exitWithAnimation() {
@@ -135,5 +196,11 @@ class MusicPlayerActivity : AppCompatActivity() {
         exitWithAnimation()
         super.onBackPressed()
         unregisterPlaybackStateListener(playbackStateListener)
+    }
+    
+    override fun onDestroy() {
+        super.onDestroy()
+        // 清理资源
+        mainHandler.removeCallbacksAndMessages(null)
     }
 }

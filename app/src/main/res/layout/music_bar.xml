@@ -8,64 +8,74 @@
     android:layout_gravity="bottom"
     app:cardCornerRadius="20dp"
     app:cardElevation="4dp"
-    app:cardBackgroundColor="@android:color/white">
+    app:cardBackgroundColor="@android:color/transparent">
 
-    <!-- 内部ConstraintLayout会在CardView中居中 -->
+    <!-- 1. 模糊背景层（最下层，独立模糊效果） -->
+    <View
+        android:id="@+id/music_bar_blur"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/music_bar_frosted_glass"
+    android:layout_margin="1dp"/>
+
+    <!-- 2. 内容层（位于模糊层上方） -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-    <!-- 左侧：专辑封面（垂直居中） -->
-<ImageView
-android:id="@+id/iv_album_cover"
-android:layout_width="48dp"
-android:layout_height="48dp"
-android:layout_marginStart="20dp"
-android:scaleType="centerCrop"
-android:src="@drawable/fengmian"
-app:layout_constraintBottom_toBottomOf="parent"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toTopOf="parent"
-    />
+        <!-- 专辑封面 -->
+        <ImageView
+            android:id="@+id/iv_album_cover"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="20dp"
+            android:scaleType="centerCrop"
+            android:src="@drawable/fengmian"
+            android:background="@android:color/transparent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
 
-    <!-- 中间：歌曲名称（垂直居中） -->
-<TextView
-android:id="@+id/tv_song_name"
-android:layout_width="0dp"
-android:layout_height="wrap_content"
-android:text="晴天"
-android:textColor="@android:color/black"
-android:textSize="16sp"
-android:ellipsize="end"
-android:maxLines="1"
-app:layout_constraintTop_toTopOf="parent"
-app:layout_constraintBottom_toBottomOf="parent"
-app:layout_constraintStart_toEndOf="@id/iv_album_cover"
-app:layout_constraintEnd_toStartOf="@id/iv_play"
-android:layout_marginStart="12dp"/>
+        <!-- 歌曲名称 -->
+        <TextView
+            android:id="@+id/tv_song_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:background="@android:color/transparent"
+            android:text="晴天"
+            android:textColor="@android:color/black"
+            android:textSize="16sp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@id/iv_album_cover"
+            app:layout_constraintEnd_toStartOf="@id/iv_play"
+            android:layout_marginStart="12dp"/>
 
-    <!-- 右侧：播放按钮（垂直居中） -->
+        <!-- 播放按钮 -->
+        <ImageView
+            android:id="@+id/iv_play"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:src="@drawable/ic_play"
+            android:background="@android:color/transparent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/iv_next"
+            android:layout_marginEnd="16dp"/>
 
-<ImageView
-android:id="@+id/iv_play"
-android:layout_width="32dp"
-android:layout_height="32dp"
-android:src="@drawable/ic_play"
-app:layout_constraintTop_toTopOf="parent"
-app:layout_constraintBottom_toBottomOf="parent"
-app:layout_constraintEnd_toStartOf="@id/iv_next"
-android:layout_marginEnd="16dp"/>
-
-    <!-- 右侧：下一首按钮（垂直居中） -->
-<ImageView
-android:id="@+id/iv_next"
-android:layout_width="32dp"
-android:layout_height="32dp"
-android:src="@drawable/ic_next"
-app:layout_constraintTop_toTopOf="parent"
-app:layout_constraintBottom_toBottomOf="parent"
-app:layout_constraintEnd_toEndOf="parent"
-android:layout_marginEnd="8dp"/>
+        <!-- 下一首按钮 -->
+        <ImageView
+            android:id="@+id/iv_next"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:background="@android:color/transparent"
+            android:src="@drawable/ic_next"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginEnd="8dp"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.cardview.widget.CardView>

@@ -6,7 +6,6 @@
     android:id="@+id/main_player"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/frosted_glass"
     tools:context=".MusicPlayerActivity">
 
     <!-- 新增：上方中间位置的down图标 -->

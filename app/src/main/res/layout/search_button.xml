@@ -2,24 +2,41 @@
 <androidx.cardview.widget.CardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/search_bar"
     android:layout_width="70dp"
     android:layout_height="70dp"
-    android:layout_marginEnd="16dp"
-    android:layout_gravity="bottom"
     app:cardCornerRadius="35dp"
-    app:cardElevation="8dp">
+    app:cardElevation="8dp"
+    app:cardBackgroundColor="@android:color/transparent">
 
-    <FrameLayout
+    <!-- 模糊背景层（最下层） -->
+    <View
+        android:id="@+id/search_blur"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@drawable/ios_liquid_glass">
+        android:background="@drawable/music_bar_frosted_glass"
+        android:layout_margin="1dp"/>
+
+    <!-- 搜索按钮内容 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:orientation="vertical">
 
         <ImageView
-            android:layout_width="45dp"
-            android:layout_height="45dp"
-            android:layout_gravity="center"
+            android:id="@+id/search_icon"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
             android:src="@drawable/ic_search" />
-    </FrameLayout>
+
+        <TextView
+            android:id="@+id/search_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="0dp"
+            android:text="搜索"
+            android:textColor="@android:color/black"
+            android:textSize="10sp" />
+    </LinearLayout>
 
 </androidx.cardview.widget.CardView>
