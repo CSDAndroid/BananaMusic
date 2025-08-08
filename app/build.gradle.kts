@@ -36,6 +36,8 @@ android {
 }
 
 dependencies {
+    implementation("com.squareup.okhttp3:okhttp:4.9.3")  // OkHttp
+    implementation("com.squareup.okhttp3:logging-interceptor:4.9.3")
 
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation(libs.androidx.lifecycle.livedata.ktx)
