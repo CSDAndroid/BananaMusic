@@ -12,12 +12,14 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.cardview.widget.CardView
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.musicapp.activity.MainActivity
 import com.example.musicapp.activity.MineActivity
 import com.example.musicapp.activity.MusicPlayerActivity
 import com.example.musicapp.activity.NavMusicActivity
+
 
 
 abstract class Nav : AppCompatActivity() {
@@ -102,7 +104,7 @@ abstract class Nav : AppCompatActivity() {
         musicText = findViewById(R.id.music_text)
         profileIcon = findViewById(R.id.profile_icon)
         profileText = findViewById(R.id.profile_text)
-
+        val searchCard = findViewById<CardView>(R.id.search_button)
         // 设置点击事件 - 使用无动画的Intent跳转
         homeLayout.setOnClickListener {
             if (this !is MainActivity) {
@@ -132,6 +134,10 @@ abstract class Nav : AppCompatActivity() {
                 overridePendingTransition(0, 0) // 禁用Activity切换动画
             }
             updateBottomNavSelection(2)
+        }
+        searchCard.setOnClickListener {
+            val intent = Intent(this, SearchActivity::class.java)
+            startActivity(intent)
         }
 
         // 根据当前Activity设置选中状态

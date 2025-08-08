@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/search_activity"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical">
+
+    <!-- 顶部搜索栏 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="16dp"
+        android:gravity="center_vertical">
+
+        <!-- 返回箭头 -->
+        <ImageView
+            android:id="@+id/iv_back"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_back"
+            android:contentDescription="返回" />
+
+        <!-- 搜索输入框 -->
+        <EditText
+            android:id="@+id/et_search"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="苟活"
+            android:paddingHorizontal="16dp"
+            android:background="@drawable/rounded_frosted_glass"
+        android:layout_marginHorizontal="8dp"
+        android:minHeight="40dp"
+        android:inputType="text" />
+
+        <!-- 搜索按钮 -->
+        <Button
+            android:id="@+id/btn_search"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/rounded_frosted_glass"
+        android:text="搜索"
+        android:minHeight="40dp"
+        android:minWidth="80dp" />
+
+    </LinearLayout>
+
+    <!-- 最近搜索标签栏 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="8dp"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="最近搜索"
+            android:textSize="16sp"
+            android:textColor="@android:color/darker_gray" />
+
+        <!-- 清除历史标签 -->
+        <ImageView
+            android:id="@+id/iv_clear_history"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/clear"
+        android:contentDescription="清除历史" />
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="16dp">
+
+            <!-- 使用完整类名引用 ChipGroup -->
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/chip_group_history"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                app:chipSpacing="8dp" />
+        </HorizontalScrollView>
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="horizontal"
+        android:padding="16dp">
+
+        <!-- 热搜榜列表 -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_hot_search"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:layout_marginEnd="8dp" />
+
+        <!-- 热门分类列表 -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_hot_category"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+    </LinearLayout>
+</LinearLayout>
