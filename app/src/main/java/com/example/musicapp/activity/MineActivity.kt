@@ -62,11 +62,6 @@ class MineActivity : Nav() {
         iv_album_cover = findViewById<ImageView>(R.id.iv_album_cover)
         registerPlaybackStateListener(playbackStateListener)
 
-
-
-
-
-
         // 从SharedPreferences中读取数据
         val prefs = getSharedPreferences("data", MODE_PRIVATE)
         prefs.registerOnSharedPreferenceChangeListener(sharedPreferenceChangeListener)

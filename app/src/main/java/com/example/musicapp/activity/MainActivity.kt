@@ -31,6 +31,7 @@ import com.example.musicapp.all_fun.stop_Or_start
 import com.example.musicapp.all_fun.unregisterPlaybackStateListener
 import com.example.musicapp.network.Get_Network_Music
 import com.example.musicapp.network.MusicCallback
+import java.io.Serializable
 
 private var musiclist1 = ArrayList<Music>()
 private var musiclist2 = ArrayList<Music>()
@@ -88,12 +89,7 @@ class MainActivity : Nav() {
         tv_song_name = findViewById(R.id.tv_song_name)
         iv_play = findViewById<ImageView>(R.id.iv_play)
 
-
         registerPlaybackStateListener(playbackStateListener)
-
-
-
-
 
         // 从SharedPreferences中读取数据
         val prefs = getSharedPreferences("data", MODE_PRIVATE)
@@ -183,11 +179,7 @@ class MainActivity : Nav() {
                 historyAdapter = HistoryAdapter(musiclist1) { music ->
                     // 点击事件的处理逻辑
                     val intent = Intent(this@MainActivity, MusicPlayerActivity::class.java)
-                    intent.putExtra("music_name", music.song)
-                    intent.putExtra("music_singer", music.sing)
-                    intent.putExtra("music_pic", music.pic)
-                    intent.putExtra("music_id", music.id)
-                    intent.putExtra("music_url", music.url)
+                    intent.putExtra("MUSIC_LIST", musicList as Serializable)
                     startActivity(intent)
 
                     // 更新SharedPreferences

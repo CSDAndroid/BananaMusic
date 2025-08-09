@@ -9,6 +9,8 @@ import android.os.Looper
 import android.util.Log
 import android.view.View
 import android.animation.ValueAnimator
+import android.content.Intent
+import android.view.LayoutInflater
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.ImageView
@@ -22,8 +24,12 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.SimpleTarget
 import com.bumptech.glide.request.transition.Transition
 import com.example.musicapp.ColorExtractor
+import com.example.musicapp.Music
+import com.example.musicapp.MusicBarManager
 import com.example.musicapp.R
+import com.example.musicapp.adapter.HistoryAdapter
 import com.example.musicapp.adapter.LyricAdapter
+import com.example.musicapp.adapter.TitleAdapter
 import com.example.musicapp.all_fun.LyricLine
 import com.example.musicapp.all_fun.PlaybackState
 import com.example.musicapp.all_fun.PlaybackStateListener
@@ -31,12 +37,17 @@ import com.example.musicapp.all_fun.parseLyrics
 import com.example.musicapp.all_fun.registerPlaybackStateListener
 import com.example.musicapp.all_fun.stop_Or_start
 import com.example.musicapp.all_fun.unregisterPlaybackStateListener
+import com.example.musicapp.network.Get_Network_Music
 import com.example.musicapp.network.Getlyric
-
+import com.example.musicapp.network.MusicCallback
+import com.google.android.material.bottomsheet.BottomSheetDialog
+import java.io.Serializable
 
 
 class MusicPlayerActivity : AppCompatActivity() {
+
     // 视图变量
+
     lateinit var albumCover: ImageView
     lateinit var tvSongName: TextView
     lateinit var tvArtist: TextView
@@ -46,6 +57,8 @@ class MusicPlayerActivity : AppCompatActivity() {
     lateinit var lyrics: List<LyricLine>
     lateinit var lyric_rv: RecyclerView
     lateinit var lyricAdapter: LyricAdapter
+    private lateinit var bottomSheetDialog: BottomSheetDialog
+    private lateinit var bottomSheetRecyclerView: RecyclerView
 
     // 播放器相关
     private val mainHandler = Handler(Looper.getMainLooper())
@@ -95,6 +108,12 @@ class MusicPlayerActivity : AppCompatActivity() {
         ivDown = findViewById(R.id.iv_down)
         iv_play_pause = findViewById(R.id.iv_play_pause)
         lyric_rv = findViewById(R.id.lyric_rv)
+        val iv_audio_effect = findViewById<ImageView>(R.id.iv_audio_effect)
+        bottomSheetDialog = BottomSheetDialog(this)
+        val bottomSheetView  = LayoutInflater.from(this).inflate(R.layout.bottom_sheet_layout,null)
+        bottomSheetRecyclerView = bottomSheetView.findViewById(R.id.bottom_sheet_recycler_view)
+
+
 
         // 读取缓存数据
         val prefs = getSharedPreferences("data", MODE_PRIVATE)
@@ -112,6 +131,53 @@ class MusicPlayerActivity : AppCompatActivity() {
         loadAlbumCover(pic)
         registerPlaybackStateListener(playbackStateListener)
 
+
+
+
+
+        bottomSheetDialog.setContentView(bottomSheetView)
+        iv_audio_effect.setOnClickListener {
+            bottomSheetDialog.show()
+            Get_Network_Music(2, object : MusicCallback {
+                override fun onSuccess(musicList: ArrayList<Music>) {
+                    // 更新音乐列表
+
+                    val adapter = TitleAdapter(musicList){ music ->
+                        // 点击事件的处理逻辑
+
+
+                        // 更新SharedPreferences
+                        getSharedPreferences("data", MODE_PRIVATE).edit {
+                            putString("song", "${music.song}")
+                            putString("sing", "${music.sing}")
+                            putString("pic_url", "${music.pic}")
+                            putLong("music_id", music.id)
+                            putString("music_url", "${music.url}")
+                        }
+
+                        // 更新MusicBarManager状态
+                        MusicBarManager.updateMusicInfo(
+                            songName = music.song,
+                            singerName = music.sing,
+                            albumCover = music.pic,
+                            musicId = music.id,
+                            musicUrl = music.url
+                        )
+                    }
+
+                    bottomSheetRecyclerView.layoutManager = LinearLayoutManager(this@MusicPlayerActivity)
+                    bottomSheetRecyclerView.adapter = adapter
+                    adapter.notifyDataSetChanged()
+
+                }
+
+                override fun onFailure(error: String) {
+                    Log.e("error1", "onFailure: $error")
+                }
+            })
+        }
+
+
         ivDown.setOnClickListener {
             exitWithAnimation()
         }
@@ -127,6 +193,7 @@ class MusicPlayerActivity : AppCompatActivity() {
             }
         }
     }
+
 
     private fun loadAlbumCover(picUrl: String) {
         Glide.with(this)

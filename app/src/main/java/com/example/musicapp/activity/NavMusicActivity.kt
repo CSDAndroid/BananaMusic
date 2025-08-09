@@ -47,7 +47,6 @@ class NavMusicActivity : Nav() {
         }
 
         override fun onPlaybackTimeChanged(currentTime: Int) {
-
         }
     }
     private fun updatePlayButtonState(state: PlaybackState) {
@@ -63,7 +62,7 @@ class NavMusicActivity : Nav() {
         Log.d("PlaybackState", "状态: $state，设置资源: $resourceId")
         Log.d("PlaybackState", "iv_play是否初始化: ${::iv_play.isInitialized}")
     }
-//---------------------------------------------------------------
+//------------------------------------------------------------------
 
 
     override fun getLayoutId(): Int {
