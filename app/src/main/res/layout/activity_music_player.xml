@@ -6,7 +6,7 @@
     android:id="@+id/main_player"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MusicPlayerActivity">
+    tools:context=".view.activity.MusicPlayerActivity">
 
     <!-- 新增：上方中间位置的down图标 -->
     <ImageView

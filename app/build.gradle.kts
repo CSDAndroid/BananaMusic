@@ -38,22 +38,29 @@ android {
 dependencies {
     implementation("com.squareup.okhttp3:okhttp:4.9.3")  // OkHttp
     implementation("com.squareup.okhttp3:logging-interceptor:4.9.3")
-
-    implementation(libs.androidx.lifecycle.viewmodel.ktx)
-    implementation(libs.androidx.lifecycle.livedata.ktx)
-    implementation(libs.androidx.lifecycle.viewmodel.savedstate)
-    implementation(libs.androidx.activity.ktx)
-    implementation (libs.glide)
-    implementation(libs.androidx.swiperefreshlayout)
-    annotationProcessor (libs.compiler)
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
-    implementation(libs.androidx.cardview)
+    implementation(libs.cronet.embedded)
+
+    implementation(libs.androidx.room.common.jvm)
+    implementation(libs.androidx.room.runtime.android)
+    annotationProcessor (libs.compiler)
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
     implementation(libs.androidx.activity)
+    implementation(libs.androidx.activity.ktx)
+    implementation(libs.androidx.swiperefreshlayout)
+    implementation(libs.androidx.cardview)
     implementation(libs.androidx.constraintlayout)
+
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
+    implementation(libs.androidx.lifecycle.livedata.ktx)
+    implementation(libs.androidx.lifecycle.viewmodel.savedstate)
+
+    implementation(libs.glide)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
