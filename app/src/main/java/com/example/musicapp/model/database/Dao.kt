@@ -2,6 +2,7 @@ package com.example.musicapp.model.database
 
 import androidx.room.Dao
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
 import com.example.musicapp.model.entity.Music
@@ -29,6 +30,8 @@ interface UserDao {
     // 获取默认用户(0,0)
     @Query("SELECT * FROM user WHERE username = '0' AND password = '0' LIMIT 1")
     suspend fun getDefaultUser(): User?
+    @Query("SELECT * FROM user")
+    suspend fun getAllUsers(): List<User>
 }
 
 @Dao
@@ -66,8 +69,8 @@ interface PlaylistDao {
 @Dao
 interface MusicDao {
 
-    @Insert
-    suspend fun insertMusic(music: Music)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertMusic(music: Music) : Long
 
     @Insert
     suspend fun insertMusics(musics: List<Music>)

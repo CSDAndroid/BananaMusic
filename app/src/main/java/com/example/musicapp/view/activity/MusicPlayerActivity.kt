@@ -1,6 +1,7 @@
 package com.example.musicapp.view.activity
 
 import android.animation.ValueAnimator
+import android.content.SharedPreferences
 import android.graphics.Bitmap
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
@@ -55,6 +56,7 @@ class MusicPlayerActivity : AppCompatActivity() {
     private lateinit var bottomSheetDialog: BottomSheetDialog
     private lateinit var bottomSheetRecyclerView: RecyclerView
 
+
     private val playbackStateListener = object : PlaybackStateListener {
         override fun onPlaybackStateChanged(state: PlaybackState) {
             viewModel.updatePlaybackState(state)
@@ -75,10 +77,11 @@ class MusicPlayerActivity : AppCompatActivity() {
         setupViewModelObservers()
         setupBottomSheet()
         loadInitialData()
-        registerPlaybackStateListener(playbackStateListener)
+
 
         PlaybackStateManager.playbackState.observe(this) { state ->
             viewModel.updatePlaybackState(state)
+
             updatePlayButtonState(state) // 直接更新UI
         }
         registerPlaybackStateListener(playbackStateListener)
@@ -210,6 +213,7 @@ class MusicPlayerActivity : AppCompatActivity() {
         iv_play_pause.setImageResource(resourceId)
     }
 
+
     private fun updateLyrics(currentTime: Int) {
         val currentLineIndex = lyrics.indexOfFirst { it.time > currentTime } - 1
         if (currentLineIndex in lyrics.indices) {
@@ -272,4 +276,5 @@ class MusicPlayerActivity : AppCompatActivity() {
         super.onDestroy()
         unregisterPlaybackStateListener(playbackStateListener)
     }
+
 }

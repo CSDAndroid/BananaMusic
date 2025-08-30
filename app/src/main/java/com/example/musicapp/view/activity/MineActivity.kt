@@ -1,6 +1,10 @@
 package com.example.musicapp.view.activity
 
+import android.content.Context
+import android.content.SharedPreferences
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.widget.ImageView
 import android.widget.TextView
@@ -8,6 +12,10 @@ import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
 import com.example.musicapp.R
 import com.example.musicapp.commonUtils.PlaybackState
+import com.example.musicapp.commonUtils.PlaybackStateListener
+import com.example.musicapp.commonUtils.PlaybackStateManager
+import com.example.musicapp.commonUtils.getPlaybackState
+import com.example.musicapp.commonUtils.registerPlaybackStateListener
 import com.example.musicapp.view.navigation.Nav
 import com.example.musicapp.viewmodel.MineViewModel
 
@@ -16,9 +24,23 @@ class MineActivity : Nav() {
     private lateinit var tvSongName: TextView
     private lateinit var ivAlbumCover: ImageView
     private lateinit var viewModel: MineViewModel
+    private lateinit var sharedPreferences: SharedPreferences
+    private lateinit var iv_icon : ImageView
+    private lateinit var user_name : TextView
 
     override fun getLayoutId(): Int {
         return R.layout.activity_mine
+    }
+    private val mainHandler = Handler(Looper.getMainLooper())
+    private val playbackStateListener = object : PlaybackStateListener {
+        override fun onPlaybackStateChanged(state: PlaybackState) {
+            mainHandler.post {
+                updatePlayButtonState(state)
+                Log.d("ddd", "onPlaybackStateChanged: ")
+            }
+        }
+
+        override fun onPlaybackTimeChanged(currentTime: Int) {}
     }
 
     override fun initActivity() {
@@ -39,6 +61,19 @@ class MineActivity : Nav() {
         ivPlay = findViewById(R.id.iv_play)
         tvSongName = findViewById(R.id.tv_song_name)
         ivAlbumCover = findViewById(R.id.iv_album_cover)
+        iv_icon = findViewById<ImageView>(R.id.iv_icon)
+        user_name = findViewById<TextView>(R.id.user_name)
+        sharedPreferences = getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)
+        val username = sharedPreferences.getString("username", null)
+        val userImg = sharedPreferences.getString("user_img", "1")
+        Log.d("now_user_register", "onCreate:$userImg + $username ")
+        user_name.text = username.toString()
+        userImg?.let {
+            Glide.with(this)
+                .load(it)
+                .circleCrop()
+                .into(iv_icon)
+        }
     }
 
     private fun observeViewModel() {
@@ -56,10 +91,12 @@ class MineActivity : Nav() {
             loadAlbumCover(picUrl)
         }
 
-        // 观察播放状态
-        viewModel.playbackState.observe(this) { state ->
+
+        PlaybackStateManager.playbackState.observe(this) { state ->
             updatePlayButtonState(state)
         }
+        registerPlaybackStateListener(playbackStateListener)
+        updatePlayButtonState(getPlaybackState())
     }
 
     private fun setupClickListeners() {

@@ -73,6 +73,7 @@ class ContentAdapter(
                 if (position != RecyclerView.NO_POSITION) {
                     val music = _musicList[position]
                     onItemClickListener(music)
+                    stop_Or_start(music.url)
                 }
             }
         }

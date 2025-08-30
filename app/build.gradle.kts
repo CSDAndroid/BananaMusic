@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    kotlin("kapt")  // 直接这样添加
 }
 
 android {
@@ -36,6 +37,14 @@ android {
 }
 
 dependencies {
+    val room_version = "2.7.2"
+    implementation ("com.github.bumptech.glide:glide:4.12.0")
+    annotationProcessor ("com.github.bumptech.glide:compiler:4.12.0")
+    implementation("androidx.room:room-runtime:$room_version")
+    implementation("androidx.room:room-ktx:$room_version")
+    kapt("androidx.room:room-compiler:$room_version")
+    implementation("de.hdodenhof:circleimageview:3.1.0")
+// 添加这行，引入 CircleImageView
     implementation("com.squareup.okhttp3:okhttp:4.9.3")  // OkHttp
     implementation("com.squareup.okhttp3:logging-interceptor:4.9.3")
     implementation(libs.retrofit)

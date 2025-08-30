@@ -2,6 +2,7 @@
 package com.example.musicapp.view.activity
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Handler
@@ -19,11 +20,16 @@ import com.example.musicapp.R
 import com.example.musicapp.commonUtils.MusicBarManager
 import com.example.musicapp.commonUtils.PlaybackState
 import com.example.musicapp.commonUtils.PlaybackStateListener
+import com.example.musicapp.commonUtils.PlaybackStateManager
+import com.example.musicapp.commonUtils.getPlaybackState
 import com.example.musicapp.commonUtils.getYesOrNo
+import com.example.musicapp.commonUtils.registerPlaybackStateListener
 import com.example.musicapp.commonUtils.stop_Or_start
+import com.example.musicapp.commonUtils.unregisterPlaybackStateListener
 import com.example.musicapp.view.adapter.ContentAdapter
 import com.example.musicapp.view.navigation.Nav
 import com.example.musicapp.viewmodel.NavMusicViewModel
+import kotlin.math.log
 
 class NavMusicActivity : Nav() {
 
@@ -32,6 +38,9 @@ class NavMusicActivity : Nav() {
     private lateinit var tv_song_name: TextView
     private lateinit var iv_play : ImageView
     private lateinit var rv_song : RecyclerView
+    private lateinit var sharedPreferences: SharedPreferences
+    private lateinit var iv_icon : ImageView
+    private lateinit var user_name : TextView
     private lateinit var adapter: ContentAdapter
 
     // 处理播放播放控制栏的图标切换
@@ -40,6 +49,7 @@ class NavMusicActivity : Nav() {
         override fun onPlaybackStateChanged(state: PlaybackState) {
             mainHandler.post {
                 updatePlayButtonState(state)
+                Log.d("ddd", "onPlaybackStateChanged: ")
             }
         }
 
@@ -72,7 +82,8 @@ class NavMusicActivity : Nav() {
         iv_play = findViewById(R.id.iv_play)
         val swipeRefreshLayout = findViewById<SwipeRefreshLayout>(R.id.swipeRefreshLayout)
         rv_song = findViewById(R.id.rv_song_rv)
-
+        iv_icon = findViewById<ImageView>(R.id.iv_icon)
+        user_name = findViewById<TextView>(R.id.user_name)
         val prefs = getSharedPreferences("data", MODE_PRIVATE)
         prefs.registerOnSharedPreferenceChangeListener(sharedPreferenceChangeListener)
 
@@ -106,6 +117,17 @@ class NavMusicActivity : Nav() {
             }
             startActivity(Intent(this@NavMusicActivity, MusicPlayerActivity::class.java))
         }
+        sharedPreferences = getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)
+        val username = sharedPreferences.getString("username", null)
+        val userImg = sharedPreferences.getString("user_img", "1")
+        Log.d("now_user_register", "onCreate:$userImg + $username ")
+        user_name.text = username.toString()
+        userImg?.let {
+            Glide.with(this)
+                .load(it)
+                .circleCrop()
+                .into(iv_icon)
+        }
 
         rv_song.adapter = adapter
         rv_song.layoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
@@ -129,9 +151,13 @@ class NavMusicActivity : Nav() {
         swipeRefreshLayout.setOnRefreshListener {
             viewModel.loadMusic((1..4).random())
         }
+        PlaybackStateManager.playbackState.observe(this) { state ->
+            updatePlayButtonState(state)
+        }
+        registerPlaybackStateListener(playbackStateListener)
+        updatePlayButtonState(getPlaybackState())
 
-        val currentState = getCurrentPlaybackState()
-        playbackStateListener.onPlaybackStateChanged(currentState)
+
     }
 
     private fun getCurrentPlaybackState(): PlaybackState {
@@ -169,6 +195,11 @@ class NavMusicActivity : Nav() {
             .error(R.drawable.fm1)
             .into(iv_album_cover)
     }
+    override fun onDestroy() {
+        super.onDestroy()
+        unregisterPlaybackStateListener(playbackStateListener)
+    }
 }
+
 
 

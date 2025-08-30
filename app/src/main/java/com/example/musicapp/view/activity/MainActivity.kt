@@ -1,45 +1,80 @@
 package com.example.musicapp.view.activity
 
+import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
+import android.os.Handler
+import android.os.Looper
+import android.util.Log
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.content.edit
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.room.Database
 import com.bumptech.glide.Glide
 import com.example.musicapp.viewmodel.ActionbarViewModel
 
 import com.example.musicapp.R
+import com.example.musicapp.commonUtils.MusicBarManager
 import com.example.musicapp.view.adapter.ActionbarAdapter1
 import com.example.musicapp.view.adapter.HistoryAdapter
 import com.example.musicapp.view.adapter.TitleAdapterDay
 import com.example.musicapp.commonUtils.PlaybackState
+import com.example.musicapp.commonUtils.PlaybackStateListener
 import com.example.musicapp.commonUtils.PlaybackStateManager
+import com.example.musicapp.commonUtils.getPlaybackState
+import com.example.musicapp.commonUtils.registerPlaybackStateListener
 import com.example.musicapp.commonUtils.stop_Or_start
+import com.example.musicapp.commonUtils.unregisterPlaybackStateListener
+import com.example.musicapp.model.database.AppDatabase
 import com.example.musicapp.model.entity.Music
 import com.example.musicapp.view.navigation.Nav
 import com.example.musicapp.viewmodel.MainViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import java.io.Serializable
+import kotlin.concurrent.thread
 
 class MainActivity : Nav() {
     private lateinit var iv_album_cover: ImageView
     private lateinit var tv_song_name: TextView
     private lateinit var iv_play: ImageView
+    private lateinit var iv_icon : ImageView
     private lateinit var actionbarViewModel: ActionbarViewModel
     private lateinit var actionbarAdapter: ActionbarAdapter1
     private lateinit var historyAdapter: HistoryAdapter
     private lateinit var mainViewModel: MainViewModel
+    private lateinit var sharedPreferences: SharedPreferences
+    private lateinit var user_name : TextView
+    private val mainHandler = Handler(Looper.getMainLooper())
 
     // 适配器数据
     private var musiclist1 = ArrayList<Music>()
     private var musiclist2 = ArrayList<Music>()
+    private val playbackStateListener = object : PlaybackStateListener {
+        override fun onPlaybackStateChanged(state: PlaybackState) {
+            mainHandler.post {
+                updatePlayButtonState(state)
+                Log.d("ddd1", "onPlaybackStateChanged: ")
+            }
+        }
+
+        override fun onPlaybackTimeChanged(currentTime: Int) {}
+    }
+
 
     override fun getLayoutId(): Int {
         return R.layout.activity_main
     }
 
+
     override fun initActivity() {
+
         supportActionBar?.hide()
         // 初始化ViewModel
         initViewModels()
@@ -52,17 +87,21 @@ class MainActivity : Nav() {
         // 加载数据
         loadData()
         setupPlayButtonClick()
+        updatePlayButtonState(getPlaybackState())
     }
 
     private fun initViewModels() {
         actionbarViewModel = ViewModelProvider(this)[ActionbarViewModel::class.java]
         mainViewModel = ViewModelProvider(this)[MainViewModel::class.java]
+
     }
 
     private fun initViews() {
         iv_album_cover = findViewById(R.id.iv_album_cover)
         tv_song_name = findViewById(R.id.tv_song_name)
         iv_play = findViewById(R.id.iv_play)
+        iv_icon = findViewById<ImageView>(R.id.iv_icon)
+        user_name = findViewById<TextView>(R.id.user_name)
 
         // 导航栏RecyclerView
         val actionBarRecyclerView: RecyclerView = findViewById(R.id.action_bar_recyclerview)
@@ -87,10 +126,22 @@ class MainActivity : Nav() {
         })
     }
 
+
     private fun loadData() {
         // 加载音乐列表
         mainViewModel.loadMusicList1()
         mainViewModel.loadRandomMusicList2()
+        sharedPreferences = getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)
+        val username = sharedPreferences.getString("username", null)
+        val userImg = sharedPreferences.getString("user_img", "1")
+        Log.d("now_user_register", "onCreate:$userImg + $username ")
+        user_name.text = username.toString()
+        userImg?.let {
+            Glide.with(this)
+                .load(it)
+                .circleCrop()
+                .into(iv_icon)
+        }
     }
 
     private fun observeData() {
@@ -105,6 +156,16 @@ class MainActivity : Nav() {
                 actionbarAdapter.setSelectedPosition(position)
             }
         }
+        val musicDao = AppDatabase.getInstance(this).musicDao()
+        lifecycleScope.launch(Dispatchers.IO) {
+            musicDao.getAllMusics().collect { musics ->
+                // 打印当前数据库中的所有数据（插入/替换/删除都会触发）
+                Log.d("databasetest", "数据库数据更新，共 ${musics.size} 条数据：")
+                musics.forEachIndexed { index, music_i ->
+                    Log.d("databasetest", "[$index] db_id = ${music_i.db_id}, $music_i")
+                }
+            }
+        }
 
         // 观察音乐列表1（历史记录）
         mainViewModel.musicList1.observe(this) { musicList ->
@@ -112,6 +173,19 @@ class MainActivity : Nav() {
             historyAdapter = HistoryAdapter(musiclist1) { music ->
                 // 点击事件委托给ViewModel处理
                 mainViewModel.onMusicItemClick(music)
+                lifecycleScope.launch {
+                    try {
+                        val insertedDbId = musicDao.insertMusic(music)
+                        music.db_id = insertedDbId
+                        // 若执行到这里，说明插入/替换成功
+                        Log.d("databasetest", "本次操作成功：插入/替换音乐，新 db_id = $insertedDbId, music = $music")
+                    } catch (e: Exception) {
+                        // 捕获所有异常，打印错误信息（关键：定位为什么没执行到日志）
+                        Log.e("databasetest", "插入/替换音乐失败！music.id = ${music.id}", e)
+                    }
+                }
+
+
                 // 跳转播放页
                 val intent = Intent(this@MainActivity, MusicPlayerActivity::class.java).apply {
                     putExtra("music_name", music.song)
@@ -161,6 +235,8 @@ class MainActivity : Nav() {
         PlaybackStateManager.playbackState.observe(this) { state ->
             updatePlayButtonState(state)
         }
+        registerPlaybackStateListener(playbackStateListener)
+        updatePlayButtonState(getPlaybackState())
     }
 
     // 播放按钮状态更新
@@ -190,5 +266,10 @@ class MainActivity : Nav() {
             .placeholder(R.drawable.music)
             .error(R.drawable.music)
             .into(iv_album_cover)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        unregisterPlaybackStateListener(playbackStateListener)
     }
 }

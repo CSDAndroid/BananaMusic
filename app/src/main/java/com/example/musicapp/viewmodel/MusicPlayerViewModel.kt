@@ -47,6 +47,7 @@ class MusicPlayerViewModel : ViewModel() {
 
     fun updatePlaybackState(state: PlaybackState) {
         _playbackState.value = state
+
     }
 
     fun updatePlaybackTime(time: Int) {

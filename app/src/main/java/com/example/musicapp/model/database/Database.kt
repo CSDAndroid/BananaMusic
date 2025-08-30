@@ -14,7 +14,7 @@ import com.example.musicapp.model.entity.Music
         Music::class,
         PlaylistMusicCrossRef::class
     ],
-    version = 1,
+    version = 5,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -41,6 +41,7 @@ abstract class AppDatabase : RoomDatabase() {
                             db.execSQL("INSERT INTO user (username, password) VALUES ('0', '0')")
                         }
                     })
+                    .fallbackToDestructiveMigration()
                     .build()
                 INSTANCE = instance
                 instance

@@ -35,11 +35,14 @@
             android:exported="false"/>
         <activity
             android:name=".view.activity.MainActivity"
+            android:exported="false"
+            android:theme="@style/Theme.MusicApp.NoAnimation">
+        </activity>
+        <activity android:name=".view.activity.LoginActivity"
             android:exported="true"
             android:theme="@style/Theme.MusicApp.NoAnimation">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
